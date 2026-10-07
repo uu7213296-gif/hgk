@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="X-UA-Compatible" content="IE=edge">
+<title>نظام الرواتب والإعاشات - الإصدار التشغيلي Supabase 1.0</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;width:100%;height:100%;background:#f4f6f8;font-family:Tahoma,Arial;color:#263238;overflow:hidden;overscroll-behavior:none}
+#content,#side{overscroll-behavior:contain;scroll-behavior:auto}
+button,input,select{font-family:Tahoma,Arial}
+#top{height:62px;background:#18324a;color:#fff;position:relative}
+#brand{position:absolute;right:28px;top:11px;font-size:20px;font-weight:bold}
+#subbrand{position:absolute;right:30px;top:38px;font-size:11px;color:#cbd7e1}
+#userbar{position:absolute;left:20px;top:16px;font-size:11px;color:#dbe5ec}
+#body{position:absolute;top:62px;bottom:0;right:0;left:0}
+#side{position:absolute;right:0;top:0;bottom:0;width:205px;background:#fff;border-left:1px solid #d9e0e5;overflow-y:auto}
+.navtitle{padding:17px 18px 8px;color:#8493a0;font-size:11px;font-weight:bold}
+.nav{margin:0;padding:0;list-style:none}
+.nav li{padding:11px 18px;border-bottom:1px solid #eef1f3;cursor:pointer;font-size:13px}
+.nav li:hover{background:#f1f5f8}.nav li.active{background:#e8f0f6;color:#18324a;font-weight:bold;border-right:4px solid #2d6b8e;padding-right:14px}
+#content{position:absolute;right:205px;left:0;top:0;bottom:0;overflow:auto;padding:24px 28px;background:#f4f6f8}
+.page{display:none}.title{font-size:22px;font-weight:bold;color:#18324a;margin-bottom:5px}.desc{font-size:12px;color:#6f7d87;margin-bottom:20px}
+.card{display:inline-block;vertical-align:top;width:22%;min-width:180px;margin:0 1% 18px 0;background:#fff;border:1px solid #dde4e9;padding:18px}.card .num{font-size:24px;font-weight:bold;color:#18324a;margin-top:8px}.card .lbl{color:#74828c;font-size:12px}
+.panel{background:#fff;border:1px solid #dce3e8;margin-bottom:18px}.panelhead{padding:13px 16px;border-bottom:1px solid #e7ecef;font-weight:bold;color:#18324a}.panelbody{padding:16px}
+.btn{display:inline-block;padding:9px 15px;margin-left:6px;margin-bottom:4px;border:1px solid #b9c7d0;background:#fff;cursor:pointer;font-size:12px}.btn.primary{background:#2d6b8e;color:#fff;border-color:#2d6b8e}.btn.green{background:#3b7d5b;color:#fff;border-color:#3b7d5b}.btn.danger{background:#9b3b3b;color:#fff;border-color:#9b3b3b}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.table{width:100%;border-collapse:collapse;background:#fff}.table th{background:#f0f4f6;color:#50616d;font-size:11px;padding:10px;border:1px solid #dfe6ea}.table td{padding:10px;border:1px solid #e4e9ec;font-size:12px;vertical-align:top}
+.note{background:#f7fafb;border-right:4px solid #2d6b8e;padding:12px;color:#5d6b75;font-size:12px;line-height:1.8}.ok{color:#2f6d4a}.warn{color:#9a6b20}.dangerText{color:#9b3b3b}.small{font-size:11px;color:#7b8790}.toolbar{margin-bottom:14px}.hidden{display:none!important}
+input,select{font-size:12px;padding:7px;border:1px solid #cbd5db;background:#fff}input[type=file]{padding:5px}
+.field{display:inline-block;vertical-align:top;width:30%;margin:0 2% 10px 0}.field label{display:block;font-size:11px;color:#667782;margin-bottom:5px}.field input,.field select{width:100%}
+.field.wide{width:47%}
+.statusLine{margin-top:8px;font-size:12px;color:#596972}
+.bad{color:#9b3b3b}.greenText{color:#2f6d4a}
+.badge{display:inline-block;padding:5px 8px;border:1px solid #c5d0d6;font-size:11px;background:#f7fafb}
+#loginOverlay{position:fixed;left:0;top:0;right:0;bottom:0;background:#eef2f5;z-index:9999;display:block;overflow:auto}
+#loginBox{width:420px;max-width:calc(100% - 30px);margin:90px auto;background:#fff;border:1px solid #d5dee4;box-shadow:0 2px 10px #cdd5da}
+#loginHead{background:#18324a;color:#fff;padding:20px;font-size:20px;font-weight:bold}
+#loginBody{padding:24px}.loginRow{margin-bottom:14px}.loginRow label{display:block;font-size:11px;color:#687983;margin-bottom:6px}.loginRow input{width:100%;padding:9px}.loginMsg{min-height:22px;margin:10px 0;font-size:11px;color:#9b3b3b}.loginFoot{font-size:10px;color:#87949d;line-height:1.8;margin-top:16px}
+#supabaseAdminTools{position:fixed;bottom:14px;left:14px;right:220px;z-index:200;background:#fff;border:1px solid #ddd;padding:12px;box-shadow:0 8px 30px rgba(0,0,0,.12);direction:rtl;display:none}
+#supabaseAdminTools .sat-title{font-weight:bold;margin-bottom:8px;color:#18324a}.satStatus{font-size:11px;color:#5d6b75}
+.modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:9000;display:none}.modalBox{position:absolute;top:80px;left:50%;transform:translateX(-50%);width:540px;max-width:calc(100% - 30px);background:#fff;border:1px solid #d0d8de}.modalHead{padding:12px 16px;background:#f0f4f6;font-weight:bold;color:#18324a}.modalBody{padding:18px}.modalActions{padding:12px 16px;border-top:1px solid #e5eaed;text-align:left}
+.empty{color:#7b8790;text-align:center;padding:25px}
+.dbStatusGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.dbStat{background:#f7fafb;border:1px solid #dce5ea;padding:12px}.dbStat b{display:block;color:#18324a;font-size:18px;margin-top:5px}.securityNote{margin-top:12px;font-size:11px;color:#687983;line-height:1.8}.restoreBox{display:inline-block;vertical-align:middle;margin-right:6px}.restoreBox input{max-width:240px}.fingerprintHint{margin-top:10px;padding:10px;background:#f7fafb;border-right:4px solid #7f8f99;color:#5c6972;font-size:11px;line-height:1.8}.userDelete{white-space:nowrap}.wheelHint{font-size:10px;color:#84919a;margin-top:8px}
+
+@media(max-width:900px){#side{width:175px}#content{right:175px;padding:18px}.card{width:47%;min-width:0}.field{width:47%}#supabaseAdminTools{right:190px}}
+@media(max-width:650px){#top{height:72px}#brand{font-size:17px;right:15px}#subbrand{right:17px;top:42px}#userbar{left:12px;top:12px;font-size:10px}#body{top:72px}#side{width:0;display:none}#content{right:0;padding:15px}.card{width:100%;margin-left:0}.field,.field.wide{width:100%;margin-right:0}.table{min-width:760px}.panelbody{overflow-x:auto}#supabaseAdminTools{right:14px;left:14px;bottom:10px}}
+</style>
+</head>
+<body>
+<div id="loginOverlay">
+  <div id="loginBox">
+    <div id="loginHead">نظام الرواتب والإعاشات</div>
+    <div id="loginBody">
+      <div class="loginRow"><label>البريد الإلكتروني</label><input id="loginUser" type="email" autocomplete="username"></div>
+      <div class="loginRow"><label>كلمة المرور</label><input id="loginPass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"></div>
+      <div id="loginMsg" class="loginMsg"></div>
+      <button class="btn primary" style="width:100%;margin:0" onclick="login()">تسجيل الدخول</button>
+      <div class="loginFoot">الدخول يتم عبر حساب Supabase المصرّح له في نظام الرواتب. لا توجد قاعدة بيانات محلية مطلوبة.</div>
+    </div>
+  </div>
+</div>
+
+<div id="appShell" style="display:none">
+  <div id="top">
+    <div id="brand">نظام الرواتب والإعاشات</div>
+    <div id="subbrand">الإصدار التشغيلي Supabase 1.0</div>
+    <div id="userbar"></div>
+  </div>
+  <div id="body">
+    <aside id="side">
+      <div class="navtitle">القائمة الرئيسية</div>
+      <ul class="nav" id="nav">
+        <li id="n_home" data-page="home" onclick="showPage('home',this)">لوحة التحكم</li>
+        <li data-page="employees" onclick="showPage('employees',this)">الموظفون</li>
+        <li data-page="review" onclick="showPage('review',this)">مراجعة موظف</li>
+        <li data-page="cash" onclick="showPage('cash',this)">رفع كشف الرواتب</li>
+        <li data-page="bank" onclick="showPage('bank',this)">إثبات صرف البنك</li>
+        <li data-page="food" onclick="showPage('food',this)">رفع كشف الإعاشات</li>
+        <li data-page="entitlements" onclick="showPage('entitlements',this)">الاستحقاقات</li>
+        <li data-page="pay" onclick="showPage('pay',this)">الصرف</li>
+        <li data-page="agents" onclick="showPage('agents',this)">الوكلاء والتفويضات</li>
+        <li data-page="vouchers" onclick="showPage('vouchers',this)">سندات الصرف</li>
+        <li data-page="reports" onclick="showPage('reports',this)">التقارير</li>
+        <li id="n_users" data-page="users" onclick="showPage('users',this)">المستخدمون</li>
+        <li id="n_dbadmin" data-page="dbadmin" onclick="showPage('dbadmin',this)">إدارة قاعدة البيانات</li>
+        <li id="n_closeyear" data-page="closeyear" onclick="showPage('closeyear',this)">إغلاق السنة</li>
+        <li data-page="settings" onclick="showPage('settings',this)">الإعدادات</li>
+        <li id="n_audit" data-page="audit" onclick="showPage('audit',this)">سجل التدقيق</li>
+      </ul>
+    </aside>
+
+    <main id="content">
+      <section class="page" id="home">
+        <div class="title">لوحة التحكم</div>
+        <div class="desc">ملخص تشغيلي للرواتب والإعاشات وعمليات الصرف.</div>
+        <div class="card"><div class="lbl">مستحقات الرواتب غير المصروفة</div><div class="num" id="dashCash">0.00</div></div>
+        <div class="card"><div class="lbl">إجمالي العمليات المصروفة</div><div class="num" id="dashPay">0</div></div>
+        <div class="card"><div class="lbl">مستحقات الإعاشة غير المصروفة</div><div class="num" id="dashFood">0.00</div></div>
+        <div class="card"><div class="lbl">بيان البنك</div><div class="num" id="dashBank">—</div></div>
+        <div class="panel"><div class="panelhead">حالة النظام</div><div class="panelbody">
+          <div class="note"><b>المستخدم:</b> <span id="dashUser">—</span><br><b>مصدر البيانات:</b> Supabase<br><b>حالة الاتصال:</b> <span class="ok">متصل</span><br><b>تاريخ اليوم:</b> <span id="dashDate">—</span></div>
+        </div></div>
+      </section>
+
+      <section class="page" id="employees">
+        <div class="title">الموظفون</div>
+        <div class="desc">إدارة بيانات الموظفين وربط الاستحقاقات بهم.</div>
+        <div class="panel"><div class="panelbody">
+          <button id="addEmpBtn" class="btn primary" onclick="addEmployee()">إضافة موظف</button>
+          <button class="btn" onclick="employeeFingerprintSearch()">بحث بالبصمة</button>
+          <div class="fingerprintHint">البصمة في نسخة HTML تعمل عبر WebAuthn باستخدام بصمة/قفل الجهاز. افتح النظام من رابط HTTPS أو localhost؛ فتح ملف HTML مباشرة من <b>file://</b> لن يسمح للمتصفح بتشغيل WebAuthn.</div>
+          <input id="empSearch" placeholder="رقم الموظف أو اسم الموظف" oninput="renderEmployees()" style="width:280px;max-width:100%">
+        </div></div>
+        <div class="panel"><div class="panelhead">قائمة الموظفين</div><div class="panelbody" style="overflow:auto"><table class="table"><thead><tr><th>الرقم الوظيفي</th><th>اسم الموظف</th><th>البصمة</th><th>راتب متبقٍ</th><th>إعاشة متبقية</th><th>الحالة</th><th>الإجراءات</th></tr></thead><tbody id="employeesRows"></tbody></table></div></div>
+      </section>
+
+      <section class="page" id="review">
+        <div class="title">مراجعة موظف</div><div class="desc">عرض الاستحقاقات المصروفة وغير المصروفة للموظف.</div>
+        <div class="panel"><div class="panelbody">
+          <div class="field"><label>الرقم الوظيفي</label><input id="reviewEmpNo" oninput="document.getElementById('reviewFp').value='';renderEmployeeReview()"></div>
+          <input id="reviewFp" type="hidden">
+          <button class="btn primary" onclick="renderEmployeeReview()">بحث</button>
+          <button class="btn" onclick="reviewFingerprint()">استخدام البصمة</button>
+          <div class="fingerprintHint">اضغط الزر ثم ضع بصمة الجهاز/استخدم قفل الجهاز. التسجيل الأول يكون من «الموظفون ← تسجيل بصمة».</div>
+        </div></div>
+        <div id="reviewResult"></div>
+      </section>
+
+      <section class="page" id="cash">
+        <div class="title">رفع كشف الرواتب</div><div class="desc">رفع كشف الرواتب من Excel/CSV، معاينته ثم اعتماده.</div>
+        <div class="panel"><div class="panelbody">
+          <div class="field wide"><label>ملف كشف الرواتب</label><input id="cashFile" type="file" accept=".xlsx,.xls,.csv,.txt"></div>
+          <button class="btn primary" onclick="previewImport('salary')">معاينة الكشف</button>
+          <div id="cashStatus" class="statusLine">—</div>
+        </div></div>
+        <div id="cashPreview"></div>
+      </section>
+
+      <section class="page" id="bank">
+        <div class="title">إثبات صرف البنك</div><div class="desc">رفع ملف البنك لتأكيد الاستحقاقات التي تم صرفها بنكيًا.</div>
+        <div class="panel"><div class="panelbody">
+          <div class="field wide"><label>ملف البنك</label><input id="bankFile" type="file" accept=".xlsx,.xls,.csv,.txt"></div>
+          <button class="btn primary" onclick="previewImport('bank')">معاينة الملف</button>
+          <div id="bankStatus" class="statusLine">—</div>
+        </div></div>
+        <div id="bankPreview"></div>
+      </section>
+
+      <section class="page" id="food">
+        <div class="title">رفع كشف الإعاشات</div><div class="desc">إضافة استحقاقات الإعاشات من ملف.</div>
+        <div class="panel"><div class="panelbody">
+          <div class="field wide"><label>ملف الإعاشات</label><input id="foodFile" type="file" accept=".xlsx,.xls,.csv,.txt"></div>
+          <button class="btn primary" onclick="previewImport('food')">معاينة الكشف</button>
+          <div id="foodStatus" class="statusLine">—</div>
+        </div></div>
+        <div id="foodPreview"></div>
+      </section>
+
+      <section class="page" id="entitlements">
+        <div class="title">الاستحقاقات</div><div class="desc">بحث ومراجعة وتعديل الاستحقاقات غير المصروفة.</div>
+        <div class="panel"><div class="panelbody">
+          <div class="field"><label>السنة</label><input id="entSearchYear" oninput="renderEntitlements()"></div>
+          <div class="field"><label>الشهر</label><select id="entSearchMonth" onchange="renderEntitlements()"><option value="">كل الأشهر</option><option value="1">يناير</option><option value="2">فبراير</option><option value="3">مارس</option><option value="4">أبريل</option><option value="5">مايو</option><option value="6">يونيو</option><option value="7">يوليو</option><option value="8">أغسطس</option><option value="9">سبتمبر</option><option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option></select></div>
+          <div class="field"><label>النوع</label><select id="entSearchType" onchange="renderEntitlements()"><option value="">الكل</option><option value="salary">راتب</option><option value="allowance">إعاشة</option></select></div>
+          <div class="field wide"><label>رقم الموظف / الاسم</label><input id="entSearchEmp" oninput="renderEntitlements()"></div>
+        </div></div>
+        <div class="panel"><div class="panelhead">قائمة الاستحقاقات</div><div class="panelbody" style="overflow:auto"><table class="table"><thead><tr><th>الرقم الوظيفي</th><th>اسم الموظف</th><th>الفترة</th><th>البند</th><th>المبلغ</th><th>الحالة</th><th>الإجراءات</th></tr></thead><tbody id="entitlementsRows"></tbody></table></div></div>
+      </section>
+
+      <section class="page" id="pay">
+        <div class="title">الصرف</div><div class="desc">اعتماد صرف استحقاقات الموظف أو الوكيل وإنشاء سند صرف.</div>
+        <div class="panel"><div class="panelbody">
+          <div class="field"><label>رقم الموظف</label><input id="payEmpNo" oninput="renderPay()"></div>
+          <button class="btn" onclick="payFingerprintSearch()">تحديد بالبصمة</button>
+          <div id="payEmpInfo" class="statusLine">—</div>
+        </div></div>
+        <div class="panel"><div class="panelhead">الاستحقاقات القابلة للصرف</div><div class="panelbody" style="overflow:auto"><table class="table"><thead><tr><th>تحديد</th><th>الفترة</th><th>البند</th><th>المبلغ</th><th>الحالة</th></tr></thead><tbody id="payRows"></tbody></table>
+          <div style="margin-top:12px"><button class="btn primary" onclick="payEmployee()">صرف للشخص نفسه</button><button class="btn green" onclick="payViaAgent()">صرف عبر وكيل</button></div>
+        </div></div>
+      </section>
+
+      <section class="page" id="agents">
+        <div class="title">الوكلاء والتفويضات</div><div class="desc">إدارة الوكلاء وتفويض الموظفين لهم وتسجيل الاعتماد.</div>
+        <div class="panel"><div class="panelbody"><button class="btn primary" onclick="addAgent()">إضافة وكيل</button></div></div>
+        <div class="panel"><div class="panelhead">قائمة الوكلاء</div><div class="panelbody" style="overflow:auto"><table class="table"><thead><tr><th>المعرف</th><th>اسم الوكيل</th><th>الموظفون المفوضون</th><th>الجوال</th><th>البصمة</th><th>الحالة</th><th>الإجراءات</th></tr></thead><tbody id="agentsRows"></tbody></table></div></div>
+      </section>
+
+      <section class="page" id="vouchers">
+        <div class="title">سندات الصرف</div><div class="desc">حفظ ومراجعة وإعادة طباعة سندات الصرف المعتمدة.</div>
+        <div class="panel"><div class="panelhead">السندات</div><div class="panelbody" style="overflow:auto"><table class="table"><thead><tr><th>رقم السند</th><th>التاريخ</th><th>الطريقة</th><th>المستفيد</th><th>الإجمالي</th><th>عدد الطباعة</th><th>الإجراء</th></tr></thead><tbody id="vouchersRows"></tbody></table></div></div>
+      </section>
+
+      <section class="page" id="reports">
+        <div class="title">التقارير</div><div class="desc">كشف المستحقات غير المصروفة وفق السنة والشهر والبند.</div>
+        <div class="panel"><div class="panelbody">
+          <div class="field"><label>السنة</label><input id="rYear" onchange="renderReports()"></div>
+          <div class="field"><label>الشهر</label><select id="rMonth" onchange="renderReports()"><option value="">اختر الشهر</option><option value="1">يناير</option><option value="2">فبراير</option><option value="3">مارس</option><option value="4">أبريل</option><option value="5">مايو</option><option value="6">يونيو</option><option value="7">يوليو</option><option value="8">أغسطس</option><option value="9">سبتمبر</option><option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option></select></div>
+          <div class="field"><label>النوع</label><select id="rType" onchange="renderReports()"><option value="">الكل</option><option value="salary">رواتب</option><option value="allowance">إعاشات</option></select></div>
+          <button class="btn primary" onclick="printFullEntitlementReport()">طباعة كشف المستحقات</button>
+          <div id="reportSummary" class="statusLine"></div>
+        </div></div>
+        <div class="panel"><div class="panelhead">بيانات التقرير</div><div class="panelbody" style="overflow:auto"><table class="table"><thead><tr><th>الرقم الوظيفي</th><th>اسم الموظف</th><th>الفترة</th><th>البند</th><th>الاستحقاق</th><th>الخصم</th><th>الصافي</th></tr></thead><tbody id="reportRows"></tbody></table></div></div>
+      </section>
+
+      <section class="page" id="users">
+        <div class="title">المستخدمون</div><div class="desc">إنشاء حسابات الدخول وتحديد الصلاحيات. كلمة المرور تُنشأ من هنا وتُحفظ داخل Supabase Auth، وليس داخل بيانات النظام العادية.</div>
+        <div class="panel"><div class="panelbody">
+          <button class="btn primary" onclick="openUserModal()">إضافة مستخدم جديد</button>
+          <span id="userStatus" class="statusLine"></span>
+        </div></div>
+        <div class="panel"><div class="panelhead">المستخدمون والصلاحيات</div><div class="panelbody" style="overflow:auto"><table class="table"><thead><tr><th>البريد الإلكتروني</th><th>الاسم</th><th>الدور</th><th>الحالة</th><th>آخر إنشاء</th><th>الإجراء</th></tr></thead><tbody id="usersRows"></tbody></table></div></div>
+        <div class="note">الدور <b>مدير</b> كامل الصلاحيات، و<b>محاسب</b> و<b>موظف تسليم</b> يعملان حسب الصلاحيات المبرمجة. تغيير الدور هنا يُحدّث جدول <b>payroll_user_roles</b> أيضًا. زر «حذف المستخدم» يحذف الحساب من Supabase Auth أيضًا بعد تفعيل دالة الحذف الآمنة المرفقة.</div>
+      </section>
+
+      <section class="page" id="dbadmin">
+        <div class="title">إدارة قاعدة البيانات</div><div class="desc">أدوات المدير الخاصة بقاعدة بيانات Supabase والنسخ الاحتياطي وإدارة الكشوف المرفوعة.</div>
+        <div class="panel"><div class="panelhead">حالة قاعدة البيانات</div><div class="panelbody">
+          <div class="note"><b>المصدر:</b> Supabase REST<br><b>المستخدم الحالي:</b> <span id="dbAdminUser">—</span><br><b>الجلسة:</b> <span id="dbAdminSession">—</span></div>
+          <div class="dbStatusGrid">
+            <div class="dbStat">الموظفون<b id="dbCountEmployees">0</b></div>
+            <div class="dbStat">الاستحقاقات<b id="dbCountEntitlements">0</b></div>
+            <div class="dbStat">عمليات الصرف<b id="dbCountPayments">0</b></div>
+            <div class="dbStat">سندات الصرف<b id="dbCountVouchers">0</b></div>
+            <div class="dbStat">الوكلاء<b id="dbCountAgents">0</b></div>
+            <div class="dbStat">سجل التدقيق<b id="dbCountAudit">0</b></div>
+          </div>
+        </div></div>
+        <div class="panel"><div class="panelhead">إدارة البيانات</div><div class="panelbody">
+          <button class="btn primary" onclick="supabaseBackup()">حفظ نسخة احتياطية</button>
+          <label class="btn restoreBox" style="cursor:pointer">استيراد نسخة احتياطية<input id="restoreFile" type="file" accept=".json,application/json" onchange="restoreSupabaseBackup(this)" style="display:none"></label>
+          
+          <button class="btn" onclick="refreshDatabasePage()">تحديث البيانات</button>
+          <span id="satStatus" class="satStatus"></span>
+          <div class="securityNote">بخصوص البصمة: يجب فتح النظام عبر HTTPS وليس file://؛ عند التسجيل سيستخدم النظام بصمة/Windows Hello الخاصة بالجهاز نفسه. إذا كان جهازك لا يدعم مصادقة المنصة، فلن يستطيع HTML وحده تشغيل قارئ USB خارجي.<br><br>النسخة الاحتياطية تُنزّل إلى جهازك كملف JSON ويمكن استيرادها من هنا. لا يتم استيراد حسابات Supabase Auth من النسخة الاحتياطية حفاظًا على أمان الدخول. يجب إبقاء سياسات RLS مفعلة على الجداول الحساسة.</div>
+          <div class="wheelHint">يمكنك استخدام عجلة الماوس للتمرير داخل الصفحة والقائمة والجداول الطويلة.</div>
+        </div></div>
+        <div class="panel"><div class="panelhead">الكشوف المرفوعة — راتب / إعاشة / بنك</div><div class="panelbody">
+          <div class="small" style="margin-bottom:10px">من هنا تظهر كل الكشوف المعتمدة المسجلة في النظام. يمكن إلغاء الكشف مع حفظ العملية في سجل التدقيق.</div>
+          <div style="overflow:auto"><table class="table"><thead><tr><th>النوع</th><th>اسم الملف</th><th>السنة</th><th>الشهر</th><th>عدد السجلات</th><th>تاريخ الاعتماد</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="uploadsRows"></tbody></table></div>
+        </div></div>
+      </section>
+
+      <section class="page" id="closeyear">
+        <div class="title">إغلاق السنة</div><div class="desc">إغلاق السنة يمنع إدخال أو صرف جديد لها، مع بقاء السجلات للعرض والتدقيق.</div>
+        <div class="panel"><div class="panelbody"><div id="closeCheck" class="note">—</div></div></div>
+        <div class="panel"><div class="panelhead">السنوات</div><div class="panelbody" style="overflow:auto"><table class="table"><thead><tr><th>السنة</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="yearsRows"></tbody></table></div></div>
+      </section>
+
+      <section class="page" id="settings">
+        <div class="title">الإعدادات</div><div class="desc">إعدادات الاتصال ومصدر البيانات.</div>
+        <div class="panel"><div class="panelhead">حالة النظام</div><div class="panelbody">
+          <div id="settingsStatus" class="note">مصدر البيانات: <b>Supabase</b></div>
+          <div style="margin-top:12px"><span class="badge">Supabase REST</span> <span class="badge">HTTPS</span> <span class="badge">RLS مطلوب للحماية</span></div>
+        </div></div>
+      </section>
+
+      <section class="page" id="audit">
+        <div class="title">سجل التدقيق</div><div class="desc">تتبع العمليات التي أجريت داخل النظام.</div>
+        <div class="panel"><div class="panelbody"><input id="auditSearch" placeholder="بحث في السجل" oninput="renderAudit()" style="width:320px;max-width:100%"></div></div>
+        <div class="panel"><div class="panelbody" style="overflow:auto"><table class="table"><thead><tr><th>التاريخ</th><th>المستخدم</th><th>العملية</th><th>التفاصيل</th></tr></thead><tbody id="auditRows"></tbody></table></div></div>
+      </section>
+    </main>
+  </div>
+
+</div>
+
+<div id="userModal" class="modal" onclick="if(event.target===this)closeUserModal()">
+  <div class="modalBox">
+    <div class="modalHead">إضافة مستخدم جديد</div>
+    <div class="modalBody">
+      <div class="field wide"><label>البريد الإلكتروني</label><input id="newUserEmail" type="email" autocomplete="off" placeholder="name@example.com"></div>
+      <div class="field wide"><label>الاسم الكامل</label><input id="newUserFullName" autocomplete="off"></div>
+      <div class="field wide"><label>كلمة المرور</label><input id="newUserPassword" type="password" autocomplete="new-password" placeholder="8 أحرف أو أكثر"></div>
+      <div class="field wide"><label>تأكيد كلمة المرور</label><input id="newUserPassword2" type="password" autocomplete="new-password"></div>
+      <div class="field wide"><label>الصلاحية</label><select id="newUserRole"><option value="cashier">موظف تسليم</option><option value="accountant">محاسب</option><option value="manager">مدير</option></select></div>
+      <div id="newUserMsg" class="loginMsg"></div>
+    </div>
+    <div class="modalActions"><button class="btn primary" onclick="createUserAccount()">إنشاء الحساب</button><button class="btn" onclick="closeUserModal()">إلغاء</button></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const SUPABASE_URL = 'https://ueyqxexqscnyidqmjjrl.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_k2VvKsP03nKJ4fu4KqhuRQ_BaiDRiJm';
+let supabaseAccessToken = '';
+let currentUser = null;
+let currentRole = '';
+let lastActivity = 0;
+let sessionTimer = null;
+let db = {users:[],employees:[],entitlements:[],payments:[],agents:[],authorizations:[],vouchers:[],audit:[],years:[],uploads:[]};
+let pendingImport = null;
+const roleSet = ['manager','accountant','cashier'];
+
+function trim(v){return String(v==null?'':v).trim();}
+function containsText(s,n){return String(s==null?'':s).toLowerCase().indexOf(String(n==null?'':n).toLowerCase())>=0;}
+function arrayHas(a,v){return Array.isArray(a)&&a.indexOf(v)>=0;}
+function nowISO(){const d=new Date(); const z=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())+' '+z(d.getHours())+':'+z(d.getMinutes())+':'+z(d.getSeconds());}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function uid(p){return p+'_'+Date.now()+'_'+Math.floor(Math.random()*100000);}
+function roleName(r){return r==='manager'?'مدير':r==='accountant'?'محاسب':r==='cashier'?'موظف تسليم':'مستخدم';}
+const MONTH_NAMES=['','يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+function monthName(v){const n=Number(v);return n>=1&&n<=12?MONTH_NAMES[n]:trim(v)||'—';}
+function parseMonthValue(v){const x=trim(v);const n=Number(x);if(Number.isInteger(n)&&n>=1&&n<=12)return n;const key=x.replace('أبريل','ابريل').replace('أغسطس','اغسطس').replace('أكتوبر','اكتوبر');const i=MONTH_NAMES.map((m,idx)=>m.replace('أبريل','ابريل').replace('أغسطس','اغسطس').replace('أكتوبر','اكتوبر')===key?idx:0).find(i=>i);return i||0;}
+function monthPrompt(current){const x=prompt('الشهر: أدخل الرقم أو الاسم\n1 يناير — 2 فبراير — 3 مارس — 4 أبريل — 5 مايو — 6 يونيو — 7 يوليو — 8 أغسطس — 9 سبتمبر — 10 أكتوبر — 11 نوفمبر — 12 ديسمبر',String(current||1));return x===null?null:parseMonthValue(x);}
+function paymentMethodLabel(v){if(!v)return '—';if(v.method==='employee')return 'الشخص نفسه';if(v.method==='agent'){const a=getById(db.agents,v.agentId);return 'عبر وكيل '+(a?a.name:'—');}if(v.method==='bank')return 'عبر البنك';return String(v.method);}
+
+function getById(arr,id){return (arr||[]).find(x=>String(x.id)===String(id))||null;}
+function activeYear(){return new Date().getFullYear();}
+function employeeByNo(no){no=trim(no);return db.employees.find(e=>String(e.employeeNo)===no)||null;}
+function employeeNameById(id){const e=getById(db.employees,id);return e?e.name:'—';}
+function entitlementKey(x){return String(x.employeeId)+'|'+x.year+'|'+x.month+'|'+x.type;}
+function activeYearClosed(y){const x=db.years.find(r=>Number(r.year)===Number(y));return !!(x&&x.closed===true);}
+function can(sec){if(currentRole==='manager')return true;if(currentRole==='accountant')return arrayHas(['home','cash','bank','food'],sec);if(currentRole==='cashier')return arrayHas(['home','employees','review','pay','agents','vouchers','reports'],sec);return sec==='home';}
+
+function headers(token){return {'apikey':SUPABASE_KEY,'Content-Type':'application/json','Accept':'application/json',...(token?{'Authorization':'Bearer '+token}:{})};}
+async function request(method,url,body=null,token=supabaseAccessToken,extra={}){
+  const r=await fetch(url,{method,headers:{...headers(token),...(extra||{})},body:body===null?undefined:JSON.stringify(body)});
+  const tx=await r.text();
+  let data=null; try{data=tx?JSON.parse(tx):null;}catch(e){data=tx;}
+  if(!r.ok){let msg=(data&&data.message)||((data&&data.error_description))||((typeof data==='string')?data:'HTTP '+r.status);throw new Error(msg);}
+  return data;
+}
+async function sha256(str){
+  if(window.crypto&&crypto.subtle){const b=new TextEncoder().encode(String(str));const h=await crypto.subtle.digest('SHA-256',b);return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+  return '';
+}
+
+async function supabaseLogin(email,password){
+  const r=await request('POST',SUPABASE_URL+'/auth/v1/token?grant_type=password',{email,password},'');
+  if(!r||!r.access_token||!r.user)throw new Error('لم يتم استلام جلسة الدخول');
+  supabaseAccessToken=r.access_token;
+  let role='';
+  try{
+    const roles=await request('GET',SUPABASE_URL+'/rest/v1/payroll_user_roles?select=role,user_id&user_id=eq.'+encodeURIComponent(r.user.id)+'&limit=1');
+    if(roles&&roles.length) role=roles[0].role;
+  }catch(_){ }
+  // Fallback: use the application's users registry when the RLS policy on payroll_user_roles
+  // has not yet been configured. This lets a newly-created account log in while preserving
+  // the selected role in payroll_app_data.
+  if(!role){
+    try{
+      const appRows=await request('GET',SUPABASE_URL+'/rest/v1/payroll_app_data?select=name,data&name=eq.users&limit=1');
+      const usersRow=appRows&&appRows[0]&&Array.isArray(appRows[0].data)?appRows[0].data:[];
+      const local=usersRow.find(u=>String(u.id)===String(r.user.id)||String(u.username||'').toLowerCase()===email.toLowerCase());
+      if(local) role=local.role;
+    }catch(_){ }
+  }
+  if(!role)throw new Error('الحساب موجود لكن لم يتم ربطه بصلاحية. من صفحة المستخدمين اضغط «إعادة ربط الصلاحية» أو أعد إنشاء المستخدم.');
+  if(!roleSet.includes(role))throw new Error('الدور المسجل غير صالح.');
+  currentUser={id:r.user.id,username:email,fullName:(r.user.user_metadata&&r.user.user_metadata.full_name)||email,email,role,active:true};
+  currentRole=role;
+  await loadAllData();
+  ensureCurrentYear();
+}
+async function loadAllData(){
+  const rows=await request('GET',SUPABASE_URL+'/rest/v1/payroll_app_data?select=name,data&order=name.asc');
+  const fresh={users:[],employees:[],entitlements:[],payments:[],agents:[],authorizations:[],vouchers:[],audit:[],years:[],uploads:[]};
+  (rows||[]).forEach(r=>{if(Object.prototype.hasOwnProperty.call(fresh,r.name))fresh[r.name]=Array.isArray(r.data)?r.data:[];});
+  db=fresh;
+  db.employees.forEach(e=>{if(!Array.isArray(e.fingerprintCredentials))e.fingerprintCredentials=[];if(e.fingerprintCredentialId&&!e.fingerprintCredentials.includes(e.fingerprintCredentialId))e.fingerprintCredentials.push(e.fingerprintCredentialId);});
+  db.agents.forEach(a=>{if(!Array.isArray(a.fingerprintCredentials))a.fingerprintCredentials=[];if(a.fingerprintCredentialId&&!a.fingerprintCredentials.includes(a.fingerprintCredentialId))a.fingerprintCredentials.push(a.fingerprintCredentialId);});
+}
+async function saveData(name,data){
+  const body={name,data,updated_by:currentUser?currentUser.id:null};
+  await request('POST',SUPABASE_URL+'/rest/v1/payroll_app_data?on_conflict=name',body,supabaseAccessToken,{'Prefer':'resolution=merge-duplicates,return=minimal'});
+  db[name]=data;
+  return true;
+}
+async function audit(action,details){
+  try{
+    const a=Array.isArray(db.audit)?db.audit.slice():[];
+    a.push({id:uid('AUD'),at:nowISO(),userId:currentUser?currentUser.id:null,username:currentUser?currentUser.username:'SYSTEM',action,details:details||''});
+    db.audit=a;
+    await saveData('audit',a);
+    try{await request('POST',SUPABASE_URL+'/rest/v1/payroll_audit_log',{action,entity_type:'app',details:{text:details||'',username:currentUser?currentUser.username:'SYSTEM'}},supabaseAccessToken,{'Prefer':'return=minimal'});}catch(e){}
+  }catch(e){}
+}
+async function ensureCurrentYear(){
+  const y=activeYear();
+  if(!db.years.some(x=>Number(x.year)===y)){db.years.push({year:y,closed:false,createdAt:nowISO()});await saveData('years',db.years);}
+}
+function userSession(){document.getElementById('loginUser').value='';document.getElementById('loginPass').value='';}
+function touchSession(){lastActivity=Date.now();}
+function startSessionMonitor(){touchSession();document.onclick=()=>{if(currentUser)touchSession();};document.onkeydown=()=>{if(currentUser)touchSession();};if(sessionTimer)clearInterval(sessionTimer);sessionTimer=setInterval(()=>{if(currentUser&&Date.now()-lastActivity>900000){audit('انتهاء جلسة','إغلاق تلقائي بعد 15 دقيقة من عدم النشاط');alert('انتهت الجلسة بسبب عدم النشاط.');logout();}},60000);}
+function showLogin(){document.getElementById('loginOverlay').style.display='block';document.getElementById('appShell').style.display='none';document.getElementById('loginUser').focus();}
+async function login(){
+  const u=trim(document.getElementById('loginUser').value),p=document.getElementById('loginPass').value,msg=document.getElementById('loginMsg');
+  msg.textContent=''; if(!u||!p){msg.textContent='أدخل البريد الإلكتروني وكلمة المرور.';return;}
+  try{
+    await supabaseLogin(u,p);
+    userSession();document.getElementById('loginOverlay').style.display='none';document.getElementById('appShell').style.display='block';
+    document.getElementById('userbar').innerHTML='المستخدم: <b>'+esc(currentUser.fullName||currentUser.username)+'</b> — الصلاحية: '+esc(roleName(currentRole))+' | <span style="color:#9ee6b8">متصل بـ Supabase</span> | <a href="#" onclick="logout();return false" style="color:#fff">تسجيل الخروج</a>';
+    applyPermissions();await refreshAll();startSessionMonitor();
+  }catch(e){supabaseAccessToken='';currentUser=null;currentRole='';msg.textContent='فشل الدخول: '+(e.message||e);}
+}
+async function logout(){try{if(currentUser)await audit('تسجيل خروج','');}catch(e){}currentUser=null;currentRole='';supabaseAccessToken='';if(sessionTimer)clearInterval(sessionTimer);sessionTimer=null;showLogin();}
+function applyPermissions(){
+  document.querySelectorAll('#nav li').forEach(li=>{const id=li.getAttribute('data-page');li.style.display=can(id)?'block':'none';});
+  document.getElementById('n_users').style.display=currentRole==='manager'?'block':'none';
+  document.getElementById('n_dbadmin').style.display=currentRole==='manager'?'block':'none';
+  document.getElementById('n_closeyear').style.display=currentRole==='manager'?'block':'none';
+  document.getElementById('n_audit').style.display=currentRole==='manager'?'block':'none';
+  document.getElementById('addEmpBtn').style.display=currentRole==='manager'?'inline-block':'none';
+}
+async function showPage(id,el){document.querySelectorAll('.page').forEach(p=>p.style.display='none');const p=document.getElementById(id);if(p)p.style.display='block';document.querySelectorAll('#nav li').forEach(li=>li.classList.remove('active'));if(el)el.classList.add('active');await refreshPage(id);}
+async function firstPage(){await showPage('home',document.getElementById('n_home'));}
+async function refreshAll(){await Promise.all([renderDashboard(),renderEmployees(),renderAgents(),renderVouchers(),renderReports(),renderUsers(),renderCloseYear()]);if(currentRole==='manager')await renderAudit();if(currentRole==='manager')await renderDatabasePage();await firstPage();}
+async function refreshPage(id){if(id==='home')return renderDashboard();if(id==='employees')return renderEmployees();if(id==='review')return renderEmployeeReview();if(['cash','bank','food'].includes(id))return renderImportStatus(id);if(id==='entitlements')return renderEntitlements();if(id==='pay')return renderPay();if(id==='agents')return renderAgents();if(id==='vouchers')return renderVouchers();if(id==='reports')return renderReports();if(id==='users')return renderUsers();if(id==='dbadmin')return renderDatabasePage();if(id==='closeyear')return renderCloseYear();if(id==='settings')document.getElementById('settingsStatus').innerHTML='مصدر البيانات: <b>Supabase</b>';if(id==='audit')return renderAudit();}
+async function renderDashboard(){
+  let c1=0,c3=0,pcount=db.payments.length;db.entitlements.forEach(e=>{if(e.status!=='paid'){if(e.type==='salary')c1+=Number(e.amount||0);if(e.type==='allowance')c3+=Number(e.amount||0);}});
+  document.getElementById('dashCash').textContent=c1.toFixed(2);document.getElementById('dashBank').textContent='—';document.getElementById('dashFood').textContent=c3.toFixed(2);document.getElementById('dashPay').textContent=pcount;document.getElementById('dashUser').textContent=currentUser?currentUser.fullName:'';document.getElementById('dashDate').textContent=nowISO();
+}
+async function renderEmployees(){
+  const q=trim(document.getElementById('empSearch').value),h=[];for(const emp of db.employees){if(q&&!containsText(emp.employeeNo,q)&&!containsText(emp.name,q))continue;let ds=0,df=0;db.entitlements.forEach(e=>{if(e.employeeId===emp.id&&e.status!=='paid'){if(e.type==='salary')ds+=Number(e.amount||0);else if(e.type==='allowance')df+=Number(e.amount||0);}});h.push('<tr><td>'+esc(emp.employeeNo)+'</td><td>'+esc(emp.name)+'</td><td>'+ (credentialList(emp).length?'مسجلة':'غير مسجلة') +'</td><td>'+ds.toFixed(2)+'</td><td>'+df.toFixed(2)+'</td><td>'+ (emp.active===false?'موقوف':'فعال') +'</td><td><button class="btn" onclick="editEmployee(\''+emp.id+'\')">تعديل</button><button class="btn" onclick="registerEmployeeFingerprint(\''+emp.id+'\')">تسجيل بصمة</button></td></tr>');}
+  document.getElementById('employeesRows').innerHTML=h.join('')||'<tr><td colspan="7" class="empty">لا توجد نتائج.</td></tr>';
+}
+async function addEmployee(){
+  if(currentRole!=='manager')return alert('إضافة الموظفين للمدير فقط.');
+  const no=prompt('رقم الموظف:','');if(no===null||!trim(no))return alert('رقم الموظف مطلوب.');if(employeeByNo(trim(no)))return alert('رقم الموظف موجود مسبقًا.');
+  const name=prompt('اسم الموظف:','');if(name===null||!trim(name))return alert('اسم الموظف مطلوب.');
+  const resid=prompt('رقم الإقامة/الهوية (اختياري):','')||'',bank=prompt('البنك (اختياري):','')||'';
+  db.employees.push({id:uid('EMP'),employeeNo:trim(no),name:trim(name),residency:trim(resid),bank:trim(bank),fingerprintId:'',active:true,createdAt:nowISO()});
+  await saveData('employees',db.employees);await audit('إضافة موظف',trim(no)+' / '+trim(name));await renderEmployees();alert('تمت إضافة الموظف.');
+}
+async function editEmployee(id){if(currentRole!=='manager')return alert('تعديل بيانات الموظفين للمدير فقط.');const e=getById(db.employees,id);if(!e)return;const name=prompt('اسم الموظف:',e.name);if(name===null)return;e.name=trim(name);const resid=prompt('رقم الإقامة/الهوية:',e.residency||'');if(resid!==null)e.residency=trim(resid);const bank=prompt('البنك:',e.bank||'');if(bank!==null)e.bank=trim(bank);await saveData('employees',db.employees);await audit('تعديل موظف',e.employeeNo);await renderEmployees();alert('تم تعديل بيانات الموظف. تسجيل البصمة من زر تسجيل البصمة.');}
+function webAuthnSupported(){return !!(window.isSecureContext&&window.PublicKeyCredential&&navigator.credentials);}
+function fingerprintOriginMessage(){
+  if(location.protocol==='file:')return 'النسخة الحالية مفتوحة كملف محلي file://. بصمة الجهاز في المتصفح لا تعمل من ملف HTML مباشر. افتح النظام من رابط HTTPS مثل GitHub Pages أو استخدم localhost.';
+  if(!window.isSecureContext)return 'الصفحة الحالية ليست Secure Context. افتح النظام من HTTPS.';
+  return 'بيئة HTTPS صالحة للمصادقة بالبصمة/قفل الجهاز.';
+}
+async function platformAuthenticatorAvailable(){
+  if(!webAuthnSupported())return false;
+  try{if(PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable)return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();}catch(_){ }
+  return true;
+}
+function bytesToBase64Url(buf){const bytes=new Uint8Array(buf);let s='';for(const b of bytes)s+=String.fromCharCode(b);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function base64UrlToBytes(str){str=String(str||'').replace(/-/g,'+').replace(/_/g,'/');while(str.length%4)str+='=';const bin=atob(str);const out=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i);return out;}
+function randomChallenge(){return crypto.getRandomValues(new Uint8Array(32));}
+function credentialList(record){let a=Array.isArray(record&&record.fingerprintCredentials)?record.fingerprintCredentials.slice():[];if(record&&record.fingerprintCredentialId&&!a.includes(record.fingerprintCredentialId))a.push(record.fingerprintCredentialId);return a.filter(Boolean);}
+function rememberCredential(record,credentialId){const a=credentialList(record);if(!a.includes(credentialId))a.push(credentialId);record.fingerprintCredentials=a;record.fingerprintCredentialId=a[0]||credentialId;record.fingerprintType='webauthn-platform';record.fingerprintRegisteredAt=nowISO();record.fingerprintRegisteredBy=currentUser?currentUser.id:null;return credentialId;}
+async function registerLiveFingerprint(record,kind){
+  if(!webAuthnSupported()){alert('تعذر تشغيل البصمة.\\n\\n'+fingerprintOriginMessage()+'\\n\\nافتح النظام من HTTPS ثم اضغط «تسجيل بصمة» مرة واحدة لكل موظف.');return '';}
+  if(!(await platformAuthenticatorAvailable())){alert('هذا الجهاز لا يوفّر مصادقة بيومترية/منصة مناسبة للمتصفح.\\n\\nجرّب Chrome أو Edge أو Safari مع بصمة الجهاز/Windows Hello مفعّلة.');return '';}
+  try{
+    const encoder=new TextEncoder(),rpId=location.hostname;
+    const existing=credentialList(record).map(cid=>({type:'public-key',id:base64UrlToBytes(cid)}));
+    const cred=await navigator.credentials.create({publicKey:{challenge:randomChallenge(),rp:{name:'نظام الرواتب والإعاشات',id:rpId},user:{id:encoder.encode(kind+':'+record.id).slice(0,64),name:String(record.employeeNo||record.name||record.id),displayName:String(record.name||record.employeeNo||record.id)},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',residentKey:'required',requireResidentKey:true,userVerification:'required'},excludeCredentials:existing,timeout:60000,attestation:'none'}});
+    if(!cred)throw new Error('لم يتم تسجيل بيانات المصادقة.');
+    const id=cred.id||bytesToBase64Url(cred.rawId);rememberCredential(record,id);return id;
+  }catch(e){
+    if(e&&e.name==='NotAllowedError')return '';
+    if(e&&e.name==='SecurityError')throw new Error('رفض المتصفح عملية البصمة بسبب أمان الموقع. افتح النظام من HTTPS وليس file://.');
+    throw e;
+  }
+}
+async function captureLiveFingerprint(){
+  if(!webAuthnSupported()){alert('البصمة غير متاحة.\\n\\n'+fingerprintOriginMessage());return '';}
+  const records=[...db.employees,...db.agents],pairs=[];records.forEach(r=>credentialList(r).forEach(cid=>pairs.push({record:r,credentialId:cid})));
+  if(!pairs.length){alert('لا توجد بصمات مسجلة بعد. من صفحة «الموظفون» أو «الوكلاء» اضغط «تسجيل بصمة» أولًا.');return '';}
+  try{
+    const assertion=await navigator.credentials.get({publicKey:{challenge:randomChallenge(),rpId:location.hostname,allowCredentials:pairs.map(x=>({type:'public-key',id:base64UrlToBytes(x.credentialId)})),userVerification:'required',timeout:60000}});
+    if(!assertion)throw new Error('لم تتم عملية التحقق.');
+    const cid=assertion.id||bytesToBase64Url(assertion.rawId),found=pairs.find(x=>x.credentialId===cid);
+    if(!found)throw new Error('تم التحقق من الجهاز لكن لم يتم التعرف على الموظف/الوكيل المسجل.');
+    return cid;
+  }catch(e){
+    if(e&&e.name==='NotAllowedError')return '';
+    if(e&&e.name==='SecurityError'){alert('رفض المتصفح البصمة لأن الموقع ليس HTTPS صالحًا.\\n\\n'+fingerprintOriginMessage());return '';}
+    alert('تعذر التحقق بالبصمة: '+(e.message||e));return '';
+  }
+}
+async function registerEmployeeFingerprint(id){if(currentRole!=='manager')return alert('تسجيل بصمة الموظف للمدير فقط.');const e=getById(db.employees,id);if(!e)return;try{const fp=await registerLiveFingerprint(e,'employee');if(!fp)return;await saveData('employees',db.employees);await audit('تسجيل بصمة موظف',e.employeeNo);await renderEmployees();alert('تم تسجيل بصمة/مصادقة الجهاز للموظف '+e.name+'.');}catch(err){alert('تعذر تسجيل البصمة: '+(err.message||err));}}
+async function employeeFingerprintSearch(){if(currentRole!=='manager'&&currentRole!=='cashier')return alert('لا تملك صلاحية استخدام البصمة.');const fp=await captureLiveFingerprint();if(!fp)return;const emp=db.employees.find(e=>credentialList(e).includes(fp)),agent=db.agents.find(a=>credentialList(a).includes(fp));if(emp){document.getElementById('empSearch').value=emp.employeeNo;await renderEmployees();await audit('تعرف بالبصمة','موظف: '+emp.employeeNo);return;}if(agent){alert('تم التعرف على الوكيل: '+agent.name);await audit('تعرف بالبصمة','وكيل: '+agent.name);return;}alert('البصمة غير مسجلة لهذا المستخدم.');}
+async function reviewFingerprint(){const fp=await captureLiveFingerprint();if(!fp)return;const emp=db.employees.find(e=>credentialList(e).includes(fp));if(!emp)return alert('البصمة غير مسجلة لموظف.');document.getElementById('reviewFp').value=emp.employeeNo;document.getElementById('reviewEmpNo').value=emp.employeeNo;await renderEmployeeReview();await audit('استعلام بالبصمة','مراجعة موظف: '+emp.employeeNo);}
+async function renderEmployeeReview(){
+  const no=trim(document.getElementById('reviewEmpNo').value),fp=trim(document.getElementById('reviewFp').value),emp=no?employeeByNo(no):(db.employees.find(e=>credentialList(e).includes(fp))||null),box=document.getElementById('reviewResult');
+  if(!emp){box.innerHTML='<div class="note">أدخل الرقم الوظيفي أو استخدم التعرف بالبصمة الحية ثم اضغط بحث.</div>';return;}
+  let due=0,paid=0,deduct=0,dueSal=0,dueFood=0,h='';
+  for(const x of db.entitlements.filter(e=>e.employeeId===emp.id)){
+    const amt=Number(x.amount||0),ded=Number(x.deduction||0);deduct+=ded;let payMethod='—';
+    if(x.status==='paid'){paid+=amt;if(x.method==='bank')payMethod='عبر البنك';else if(x.method==='agent')payMethod='عبر وكيل '+((getById(db.agents,x.agentId)||{}).name||'—');else payMethod='الشخص نفسه';}else{due+=amt;if(x.type==='salary')dueSal+=amt;else dueFood+=amt;}
+    h+='<tr><td>'+x.year+' / '+monthName(x.month)+'</td><td>'+(x.type==='salary'?'راتب':'إعاشة')+'</td><td>'+Number(x.gross||amt).toFixed(2)+'</td><td>'+ded.toFixed(2)+'</td><td>'+amt.toFixed(2)+'</td><td>'+(x.status==='paid'?'مصروف':'له مستحق')+'</td><td>'+esc(payMethod)+'</td></tr>';
+  }
+  box.innerHTML='<div class="note"><b>الموظف:</b> '+esc(emp.name)+' &nbsp; <b>الرقم:</b> '+esc(emp.employeeNo)+' &nbsp; <b>حالة البصمة:</b> '+(credentialList(emp).length?'مسجلة':'غير مسجلة')+'<br><b>المتبقي له:</b> '+due.toFixed(2)+' &nbsp; <b>المصروف سابقًا:</b> '+paid.toFixed(2)+' &nbsp; <b>إجمالي الخصومات:</b> '+deduct.toFixed(2)+'<br>راتب متبقي: <b>'+dueSal.toFixed(2)+'</b> — إعاشة متبقية: <b>'+dueFood.toFixed(2)+'</b></div><div style="max-height:360px;overflow:auto;margin-top:12px"><table class="table"><tr><th>الفترة</th><th>البند</th><th>الإجمالي</th><th>الخصم</th><th>الصافي</th><th>الحالة</th><th>طريقة الصرف</th></tr>'+h+'</table></div>';
+}
+
+function parseCsv(text){
+  const rows=[];let row=[],cell='',quoted=false;
+  for(let i=0;i<text.length;i++){const ch=text[i],nx=text[i+1];if(ch==='"'){if(quoted&&nx==='"'){cell+='"';i++;}else quoted=!quoted;}else if(ch===','&&!quoted){row.push(cell.trim());cell='';}else if((ch==='\n'||ch==='\r')&&!quoted){if(ch==='\r'&&nx==='\n')i++;row.push(cell.trim());cell='';if(row.some(v=>v!==''))rows.push(row);row=[];}else{cell+=ch;}}
+  row.push(cell.trim());if(row.some(v=>v!==''))rows.push(row);return rows;
+}
+async function readSpreadsheet(file){
+  const ext=file.name.toLowerCase().split('.').pop();
+  if(ext==='csv'||ext==='txt')return parseCsv(await file.text());
+  if(!window.XLSX)throw new Error('مكتبة Excel غير متاحة. استخدم CSV أو تأكد من اتصال الإنترنت.');
+  const buf=await file.arrayBuffer();const wb=XLSX.read(buf,{type:'array'});const out=[];wb.SheetNames.forEach(sn=>{const ws=wb.Sheets[sn];const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});rows.forEach(r=>out.push(r));});return out;
+}
+function normHeader(v){return String(v||'').toLowerCase().replace(/[\s_\-\/:\.\(\)\[\]{}]+/g,'').replace(/[ًٌٍَُِّْـ]/g,'');}
+function headerIndex(headers,terms){for(let i=0;i<headers.length;i++){const h=normHeader(headers[i]);for(const t0 of terms){const t=normHeader(t0);if(h===t||h.includes(t)||t.includes(h))return i;}}return -1;}
+function findHeaderRow(rows){let best=-1,bestScore=-1;for(let r=0;r<Math.min(rows.length,15);r++){let score=0;for(const v0 of rows[r]){const v=trim(v0);if(containsText(v,'الرقم الوظيفي')||containsText(v,'رقم الموظف')||containsText(v,'employee_no'))score+=3;if(containsText(v,'اسم الموظف')||v==='الاسم'||containsText(v,'name'))score+=2;if(containsText(v,'الراتب')||containsText(v,'مبلغ الراتب')||containsText(v,'salary'))score+=2;if(containsText(v,'الخصم')||containsText(v,'deduction'))score+=1;if(containsText(v,'الصافي')||containsText(v,'net'))score+=1;}if(score>bestScore){bestScore=score;best=r;}}return best;}
+function findYearMonth(rows){let y=0,m=0;for(let r=0;r<Math.min(rows.length,8);r++)for(let c=0;c<rows[r].length;c++){const txt=trim(rows[r][c]);if(!y&&(containsText(txt,'السنة')||containsText(txt,'عام')||containsText(txt,'year'))){const yy=Number(String(rows[r][c+1]||'').replace(/[^0-9]/g,''));if(yy>=2000&&yy<=2100)y=yy;}if(!m&&(containsText(txt,'الشهر')||containsText(txt,'month'))){const mv=trim(rows[r][c+1]);const mm=Number(mv.replace(/[^0-9]/g,''));if(mm>=1&&mm<=12)m=mm;else{const names={يناير:1,فبراير:2,مارس:3,ابريل:4,'أبريل':4,مايو:5,يونيو:6,يوليو:7,اغسطس:8,'أغسطس':8,سبتمبر:9,اكتوبر:10,'أكتوبر':10,نوفمبر:11,ديسمبر:12};if(names[mv])m=names[mv];}}}return {year:y,month:m};}
+
+async function previewImport(kind){
+  if(currentRole!=='manager'&&currentRole!=='accountant')return alert('لا تملك صلاحية رفع كشوفات.');
+  const inputId=kind==='salary'?'cashFile':kind==='bank'?'bankFile':'foodFile',el=document.getElementById(inputId),file=el.files&&el.files[0];if(!file)return alert('اختر الملف أولاً.');
+  try{
+    const rows=await readSpreadsheet(file);if(rows.length<2)return alert('الملف فارغ أو غير صالح.');const hr=findHeaderRow(rows);if(hr<0)return alert('لم أجد صف عناوين صالحًا.');const headersRow=rows[hr];
+    const iEmp=headerIndex(headersRow,['الرقم الوظيفي','رقم الموظف','رقم العامل','رقم المستخدم','employee_no','employee','emp_no']),iName=headerIndex(headersRow,['اسم الموظف','الاسم','name']),iSalary=headerIndex(headersRow,['مبلغ الراتب','الراتب','الراتب الأساسي','salary']),iDed=headerIndex(headersRow,['الخصم','خصم','الخصومات','deduction']),iNet=headerIndex(headersRow,['الصافي','صافي الراتب','net']),iAmount=headerIndex(headersRow,['المبلغ','المبلغ المستحق','الإجمالي','الإعاشة','اعاشة','amount','allowance']);
+    const ym=findYearMonth(rows);const dataRows=rows.slice(hr+1).filter(r=>r.some(v=>trim(v)!==''));if(iEmp<0||iName<0)return alert('يجب أن يحتوي الكشف على: الرقم الوظيفي + اسم الموظف.');if((kind==='salary'||kind==='bank')&&(iSalary<0||iDed<0||iNet<0))return alert('يجب أن يحتوي كشف الراتب على أعمدة: مبلغ الراتب + الخصم + الصافي.');if(kind==='food'&&iAmount<0)return alert('يجب أن يحتوي كشف الإعاشات على عمود المبلغ.');
+    let year=ym.year,month=ym.month;if(!year||!month){year=Number(prompt('أدخل السنة:',String(activeYear())));if(!year)return;month=parseMonthValue(prompt('أدخل الشهر بالرقم أو الاسم\n1 يناير — 2 فبراير — 3 مارس — 4 أبريل — 5 مايو — 6 يونيو — 7 يوليو — 8 أغسطس — 9 سبتمبر — 10 أكتوبر — 11 نوفمبر — 12 ديسمبر','1'));if(!month)return;}if(!(year>=2000&&year<=2100&&month>=1&&month<=12))return alert('السنة أو الشهر غير صحيح.');
+    pendingImport={kind,inputId,path:file.name,rows:dataRows,headers:headersRow,iEmp,iName,iSalary,iDed,iNet,iAmount,fixedYear:year,fixedMonth:month};showImportPreview(kind);
+  }catch(e){alert('تعذر قراءة الملف: '+e.message);}
+}
+function showImportPreview(kind){
+  const boxId=kind==='salary'?'cashPreview':kind==='bank'?'bankPreview':'foodPreview',box=document.getElementById(boxId);const rows=pendingImport.rows;let accepted=0,rejected=0,total=0,html='',seen={};
+  for(let i=0;i<rows.length;i++){
+    const row=rows[i],empNo=trim(row[pendingImport.iEmp]),excelName=trim(row[pendingImport.iName]),emp=employeeByNo(empNo);let status='مقبول',reason='',amount=0;if(!emp){status='مرفوض';reason='الرقم الوظيفي غير موجود في النظام';}else if(excelName!==trim(emp.name)){status='مرفوض';reason='اسم الموظف في Excel لا يطابق اسم النظام';}else if(seen[empNo]){status='مرفوض';reason='الرقم الوظيفي مكرر داخل الكشف';}
+    amount=(kind==='salary'||kind==='bank')?Number(String(row[pendingImport.iNet]||0).replace(/,/g,'')):Number(String(row[pendingImport.iAmount]||0).replace(/,/g,''));if(status==='مقبول'&&!(amount>0)){status='مرفوض';reason='الصافي/المبلغ غير صحيح';}
+    if(status==='مقبول'){const key=emp.id+'|'+pendingImport.fixedYear+'|'+pendingImport.fixedMonth+'|'+(kind==='food'?'allowance':'salary');if(seen[key]){status='مرفوض';reason='تكرار لنفس الموظف والشهر';}else seen[key]=1;const existing=db.entitlements.find(e=>entitlementKey(e)===key);if(existing){if(kind==='bank'&&existing.status==='unpaid'){reason='سيتم تحويل الاستحقاق الحالي إلى مصروف بنك';}else if(kind==='bank'&&existing.status==='paid'&&existing.method==='bank'){status='مرفوض';reason='الراتب مصروف بنكيًا مسبقًا';}else if(kind==='salary'&&existing.status==='paid'&&existing.method==='bank'){status='مرفوض';reason='الراتب مصروف بالبنك؛ ممنوع صرفه كاش';}else{status='مرفوض';reason='الاستحقاق موجود مسبقًا';}}}
+    if(status==='مقبول'){accepted++;total+=amount;}else rejected++;if(i<200){const gross=(pendingImport.iSalary>=0?Number(String(row[pendingImport.iSalary]||0).replace(/,/g,'')):amount),ded=(pendingImport.iDed>=0?Number(String(row[pendingImport.iDed]||0).replace(/,/g,'')):0);html+='<tr><td>'+(i+1)+'</td><td>'+esc(empNo)+'</td><td>'+esc(excelName)+'</td><td>'+esc(emp?emp.name:'—')+'</td><td>'+gross.toFixed(2)+'</td><td>'+ded.toFixed(2)+'</td><td>'+amount.toFixed(2)+'</td><td class="'+(status==='مقبول'?'ok':'bad')+'">'+status+'</td><td>'+esc(reason)+'</td></tr>';}
+  }
+  box.innerHTML='<div class="note"><b>السنة:</b> '+pendingImport.fixedYear+' &nbsp;&nbsp; <b>الشهر:</b> '+monthName(pendingImport.fixedMonth)+'<br>إجمالي الصفوف: <b>'+rows.length+'</b> — <span class="greenText">مقبول: <b>'+accepted+'</b></span> — <span class="dangerText">مرفوض: <b>'+rejected+'</b></span> — إجمالي المقبول: <b>'+total.toFixed(2)+'</b></div><div style="max-height:300px;overflow:auto;margin-top:10px"><table class="table"><tr><th>#</th><th>الرقم الوظيفي</th><th>الاسم في Excel</th><th>الاسم في النظام</th><th>مبلغ الراتب</th><th>الخصم</th><th>الصافي</th><th>الحالة</th><th>سبب الرفض</th></tr>'+html+'</table></div><div style="margin-top:12px"><button id="approveBtn" class="btn green">اعتماد</button><button id="cancelBtn" class="btn">إلغاء</button></div>';
+  document.getElementById('approveBtn').onclick=()=>approveImport(kind);document.getElementById('cancelBtn').onclick=()=>cancelImport(kind);
+}
+function cancelImport(kind){const id=kind==='salary'?'cashPreview':kind==='bank'?'bankPreview':'foodPreview';document.getElementById(id).innerHTML='<div class="note">تم إلغاء المعاينة. لم يتم اعتماد أي بيانات.</div>';pendingImport=null;}
+async function approveImport(kind){
+  if(currentRole!=='manager'&&currentRole!=='accountant')return alert('لا تملك صلاحية اعتماد الكشوف.');if(!pendingImport||pendingImport.kind!==kind)return alert('اعرض الملف أولاً ثم اعتمده.');
+  const approveBtn=document.getElementById('approveBtn');if(approveBtn){approveBtn.disabled=true;approveBtn.textContent='جارٍ الاعتماد...';}
+  const rows=pendingImport.rows,work=db.entitlements.map(x=>JSON.parse(JSON.stringify(x)));let accepted=0,rejected=0;const msgs=[],seen={},actions=[];
+  for(let i=0;i<rows.length;i++){
+    const row=rows[i],empNo=trim(row[pendingImport.iEmp]),excelName=trim(row[pendingImport.iName]),emp=employeeByNo(empNo),amount=(kind==='salary'||kind==='bank')?Number(String(row[pendingImport.iNet]||0).replace(/,/g,'')):Number(String(row[pendingImport.iAmount]||0).replace(/,/g,''));
+    if(!emp||excelName!==trim(emp.name)||!(amount>0)){rejected++;msgs.push('صف '+(i+1)+': الرقم/الاسم/المبلغ غير مطابق');continue;}if(activeYearClosed(pendingImport.fixedYear)){rejected++;msgs.push('صف '+(i+1)+': السنة مغلقة');continue;}
+    const type=kind==='food'?'allowance':'salary',key=emp.id+'|'+pendingImport.fixedYear+'|'+pendingImport.fixedMonth+'|'+type;if(seen[key]){rejected++;msgs.push('صف '+(i+1)+': تكرار لنفس الموظف والشهر والبند');continue;}seen[key]=1;const existing=work.find(e=>entitlementKey(e)===key);const grossValue=(kind==='salary'||kind==='bank')?Number(String(row[pendingImport.iSalary]||0).replace(/,/g,'')):amount,dedValue=(kind==='salary'||kind==='bank')?Number(String(row[pendingImport.iDed]||0).replace(/,/g,'')):0;
+    if(existing){if(kind==='bank'&&existing.status==='unpaid'){if(Number(existing.amount||0)!==Number(amount||0)){rejected++;msgs.push('صف '+(i+1)+': مبلغ البنك لا يطابق الاستحقاق الموجود');continue;}actions.push({kind:'bank_existing',entitlementId:existing.id,amount});accepted++;}else{rejected++;msgs.push('صف '+(i+1)+': الاستحقاق موجود أو لا يسمح بتغييره');}continue;}
+    actions.push({kind:'new',employeeId:emp.id,type,amount,gross:grossValue,deduction:dedValue});accepted++;
+  }
+  if(rejected>0){if(approveBtn){approveBtn.disabled=false;approveBtn.textContent='اعتماد';}return alert('لا يمكن اعتماد الكشف لأن فيه صفوف مرفوضة.\n\nمقبول: '+accepted+'\nمرفوض: '+rejected+'\n\nيجب تصحيح الملف ثم رفعه من جديد.\n\n'+msgs.slice(0,10).join('\n'));}
+  const now=nowISO(),newPays=[],batchId=uid('UPL');
+  const batch={id:batchId,type:kind,file_name:pendingImport.path,year:pendingImport.fixedYear,month:pendingImport.fixedMonth,status:'approved',approved_at:now,approved_by:currentUser?currentUser.id:null,created_at:now};
+  actions.forEach(a=>{if(a.kind==='bank_existing'){const be=getById(work,a.entitlementId);if(be){be.status='paid';be.method='bank';be.bankPaidAt=now;be.bankSourceFile=pendingImport.path;be.sourceBatchId=batchId;newPays.push({id:uid('PAY'),voucherId:null,method:'bank',agentId:null,amount:a.amount,createdAt:now,createdBy:currentUser.id,lines:[{entitlementId:be.id,employeeId:be.employeeId,year:be.year,month:be.month,type:be.type,amount:a.amount}],sourceFile:pendingImport.path,sourceBatchId:batchId});}}else{const ne={id:uid('ENT'),employeeId:a.employeeId,year:pendingImport.fixedYear,month:pendingImport.fixedMonth,type:a.type,amount:a.amount,gross:a.gross,deduction:a.deduction,status:kind==='bank'?'paid':'unpaid',method:kind==='bank'?'bank':'cash',sourceFile:pendingImport.path,sourceBatchId:batchId,createdAt:now,bankPaidAt:kind==='bank'?now:null};work.push(ne);if(kind==='bank')newPays.push({id:uid('PAY'),voucherId:null,method:'bank',agentId:null,amount:a.amount,createdAt:now,createdBy:currentUser.id,lines:[{entitlementId:ne.id,employeeId:ne.employeeId,year:ne.year,month:ne.month,type:ne.type,amount:ne.amount}],sourceFile:pendingImport.path,sourceBatchId:batchId});}});
+  const oldEnts=db.entitlements,oldPays=db.payments,oldUploads=Array.isArray(db.uploads)?db.uploads.slice():[];try{await saveData('entitlements',work);if(kind==='bank'&&newPays.length)await saveData('payments',oldPays.concat(newPays));await saveData('uploads',oldUploads.concat([batch]));}catch(e){db.entitlements=oldEnts;db.payments=oldPays;db.uploads=oldUploads;if(approveBtn){approveBtn.disabled=false;approveBtn.textContent='اعتماد';}alert('تعذر تثبيت الاعتماد: '+e.message);return;}
+  const doneYear=pendingImport.fixedYear,doneMonth=pendingImport.fixedMonth;await audit('اعتماد كشف',kind+' | السنة: '+doneYear+' | الشهر: '+monthName(doneMonth)+' | قبول: '+accepted);document.getElementById(pendingImport.inputId).value='';cancelImport(kind);alert('تم اعتماد الكشف بنجاح.\n\nالسنة: '+doneYear+'\nالشهر: '+doneMonth+'\nعدد الموظفين: '+accepted+(kind==='bank'?'\nعمليات البنك المسجلة: '+newPays.length:''));await refreshAll();await renderImportStatus(kind==='salary'?'cash':kind==='bank'?'bank':'food');
+}
+async function renderImportStatus(id){const kind=id==='cash'?'salary':id==='bank'?'bank':'food';let c=0;db.entitlements.forEach(e=>{if(e.type===(kind==='food'?'allowance':'salary')&&((kind==='bank'&&e.status==='paid')||(kind!=='bank')))c++;});document.getElementById(id+'Status').innerHTML='عدد الاستحقاقات المسجلة لهذا البند: <b>'+c+'</b>';}
+
+async function renderEntitlements(){
+  const y=trim(document.getElementById('entSearchYear').value),m=trim(document.getElementById('entSearchMonth').value),q=trim(document.getElementById('entSearchEmp').value),type=document.getElementById('entSearchType').value;const h=[];
+  for(let i=db.entitlements.length-1;i>=0;i--){const e=db.entitlements[i],emp=getById(db.employees,e.employeeId);let ok=true;if(y&&String(e.year)!==y)ok=false;if(m&&String(e.month)!==m)ok=false;if(type&&e.type!==type)ok=false;if(q&&(!emp||(!containsText(emp.employeeNo,q)&&!containsText(emp.name,q))))ok=false;if(!ok)continue;h.push('<tr><td>'+esc(emp?emp.employeeNo:'—')+'</td><td>'+esc(emp?emp.name:'—')+'</td><td>'+e.year+' / '+monthName(e.month)+'</td><td>'+(e.type==='salary'?'راتب':'إعاشة')+'</td><td>'+Number(e.amount||0).toFixed(2)+'</td><td>'+(e.status==='paid'?'مصروف':'غير مصروف')+'</td><td>'+(e.status==='paid'?'<span class="small">مغلق بعد الصرف</span>':'<button class="btn" onclick="editEntitlement(\''+e.id+'\')">تعديل</button><button class="btn danger" onclick="deleteEntitlement(\''+e.id+'\')">حذف</button>')+'</td></tr>');}
+  document.getElementById('entitlementsRows').innerHTML=h.join('')||'<tr><td colspan="7" class="empty">لا توجد استحقاقات مطابقة.</td></tr>';
+}
+async function editEntitlement(id){if(currentRole!=='manager')return alert('تعديل الاستحقاقات للمدير فقط.');const e=getById(db.entitlements,id);if(!e)return alert('الاستحقاق غير موجود.');if(e.status==='paid')return alert('لا يمكن تعديل استحقاق تم صرفه. السجل المصروف محفوظ للتدقيق.');const emp=getById(db.employees,e.employeeId),oldAmount=Number(e.amount||0);let amount=prompt('المبلغ الصافي/المستحق:',String(oldAmount));if(amount===null)return;amount=Number(String(amount).replace(/,/g,''));if(!(amount>0))return alert('المبلغ غير صحيح.');let month=prompt('الشهر:',monthName(e.month));if(month===null)return;month=parseMonthValue(month);if(month<1||month>12)return alert('الشهر غير صحيح.');let year=prompt('السنة:',String(e.year));if(year===null)return;year=Number(year);if(year<2000||year>2100)return alert('السنة غير صحيحة.');const key={employeeId:e.employeeId,year,month,type:e.type};if(db.entitlements.some(x=>x.id!==e.id&&entitlementKey(x)===entitlementKey(key)))return alert('يوجد استحقاق آخر لنفس الموظف والسنة والشهر والبند.');e.amount=amount;e.month=month;e.year=year;e.modifiedAt=nowISO();e.modifiedBy=currentUser.id;await saveData('entitlements',db.entitlements);await audit('تعديل استحقاق',(emp?emp.employeeNo:'—')+' | '+year+'/'+monthName(month)+' | '+e.type+' | '+oldAmount+' -> '+amount);await renderEntitlements();await renderEmployees();await renderPay();await renderDashboard();alert('تم تعديل الاستحقاق.');}
+async function deleteEntitlement(id){if(currentRole!=='manager')return alert('حذف الاستحقاقات للمدير فقط.');const e=getById(db.entitlements,id);if(!e)return alert('الاستحقاق غير موجود.');if(e.status==='paid')return alert('لا يمكن حذف استحقاق تم صرفه.');const emp=getById(db.employees,e.employeeId);if(!confirm('تأكيد حذف الاستحقاق؟\n\nالموظف: '+(emp?emp.employeeNo:'—')+'\nالسنة: '+e.year+'\nالشهر: '+monthName(e.month)+'\nالمبلغ: '+Number(e.amount||0).toFixed(2)))return;db.entitlements=db.entitlements.filter(x=>x.id!==id);await saveData('entitlements',db.entitlements);await audit('حذف استحقاق',(emp?emp.employeeNo:'—')+' | '+e.year+'/'+monthName(e.month)+' | '+e.type+' | '+e.amount);await renderEntitlements();await renderEmployees();await renderPay();await renderDashboard();alert('تم حذف الاستحقاق.');}
+
+async function renderPay(){const no=trim(document.getElementById('payEmpNo').value),emp=employeeByNo(no),h=[];let total=0,count=0;if(emp){for(const e of db.entitlements)if(e.employeeId===emp.id&&e.status!=='paid'){h.push('<tr><td><input type="checkbox" name="paySel" value="'+e.id+'"></td><td>'+e.year+' / '+monthName(e.month)+'</td><td>'+(e.type==='salary'?'راتب':'إعاشة')+'</td><td>'+Number(e.amount||0).toFixed(2)+'</td><td>'+(e.status==='unpaid'?'مستحق':'قابل للمراجعة')+'</td></tr>');total+=Number(e.amount||0);count++;}document.getElementById('payEmpInfo').innerHTML='الموظف: <b>'+esc(emp.name)+'</b> — رقم: <b>'+esc(emp.employeeNo)+'</b> — <b>'+count+'</b> استحقاق — الإجمالي: <b>'+total.toFixed(2)+'</b>';}else document.getElementById('payEmpInfo').textContent='لا يوجد موظف بهذا الرقم الوظيفي.';document.getElementById('payRows').innerHTML=h.join('')||'<tr><td colspan="5" class="empty">لا توجد استحقاقات قابلة للصرف للموظف المحدد.</td></tr>';}
+function selectedEntIds(){return Array.from(document.querySelectorAll('input[name="paySel"]:checked')).map(x=>x.value);}
+function nextVoucherNo(){const year=new Date().getFullYear();let max=0;db.vouchers.forEach(v=>{const m=String(v.voucherNo||'').match(/^V-(\d+)-(\d+)$/);if(m&&Number(m[1])===year)max=Math.max(max,Number(m[2]));});return 'V-'+year+'-'+(max+1);}
+async function managerOverrideApproval(method){const p=prompt('أدخل كلمة مرور المدير للتجاوز:','');if(p===null)return null;try{await request('POST',SUPABASE_URL+'/auth/v1/token?grant_type=password',{email:currentUser.email,password:p},'');}catch(e){alert('كلمة مرور المدير غير صحيحة.');await audit('فشل تجاوز البصمة',method);return null;}const reason=prompt('سبب الاعتماد بدون بصمة:','تعذر استخدام جهاز البصمة');if(reason===null||!trim(reason))return null;const x={type:'manager_override',reference:'',imagePath:'',reason:trim(reason),approvedAt:nowISO(),approvedBy:currentUser.id};await audit('تجاوز بصمة المدير',method+' | '+x.reason);return x;}
+async function getPaymentApproval(method,employeeId,agentId){if(method!=='employee'&&method!=='agent')return null;if(currentRole==='manager'&&confirm('هل تريد اعتماد الصرف بدون بصمة؟\nموافق = تجاوز المدير\nإلغاء = استخدام البصمة الحية.'))return managerOverrideApproval(method);const fp=await captureLiveFingerprint();if(!fp)return null;const target=method==='employee'?getById(db.employees,employeeId):getById(db.agents,agentId);if(!target||!credentialList(target).includes(fp))return null;return {type:'fingerprint',reference:fp,imagePath:'',approvedAt:nowISO(),approvedBy:currentUser.id};}
+async function makePayment(method,agentId){
+  if(currentRole!=='manager'&&currentRole!=='cashier')return alert('لا تملك صلاحية الصرف.');const ids=selectedEntIds();if(!ids.length)return alert('حدد الاستحقاقات أولاً.');let employeeId=null,amount=0;const lines=[];
+  for(const id of ids){const e=getById(db.entitlements,id);if(!e||e.status==='paid')return alert('أحد الاستحقاقات لم يعد متاحًا للصرف.');if(activeYearClosed(e.year))return alert('السنة '+e.year+' مغلقة.');if(employeeId===null)employeeId=e.employeeId;if(method==='employee'&&e.employeeId!==employeeId)return alert('الصرف للموظف يجب أن يكون لاستحقاقات الموظف نفسه.');if(method==='agent'){if(!agentId)return alert('اختر الوكيل.');const ok=db.authorizations.some(a=>a.agentId===agentId&&a.employeeId===e.employeeId&&a.active!==false&&new Date(a.endDate||'2099-12-31')>=new Date());if(!ok)return alert('هذا الموظف غير مفوض لهذا الوكيل.');}lines.push({entitlementId:e.id,employeeId:e.employeeId,year:e.year,month:e.month,type:e.type,amount:Number(e.amount)});amount+=Number(e.amount||0);}
+  const approval=await getPaymentApproval(method,employeeId,agentId);if(!approval){if(method==='employee')return alert('لا يمكن اعتماد الصرف للموظف بدون بصمته. إذا كنت المدير يمكنك استخدام اعتماد المدير بدون بصمة.');if(method==='agent')return alert('لا يمكن اعتماد الصرف للوكيل بدون بصمته. إذا كنت المدير يمكنك استخدام اعتماد المدير بدون بصمة.');return;}
+  const voucher={id:uid('VCH'),voucherNo:nextVoucherNo(),createdAt:nowISO(),method,employeeId:method==='employee'?lines[0].employeeId:null,agentId:agentId||null,lines,total:amount,printedCount:0,createdBy:currentUser.id,status:'final',fingerprintApproval:approval};const pay={id:uid('PAY'),voucherId:voucher.id,method,agentId:agentId||null,amount,createdAt:nowISO(),createdBy:currentUser.id,lines,fingerprintApproval:approval};
+  const oldEnts=db.entitlements.slice(),oldPays=db.payments.slice(),oldVchs=db.vouchers.slice();try{db.entitlements=db.entitlements.map(e=>{const x=lines.find(l=>l.entitlementId===e.id);if(!x)return e;return {...e,status:'paid',method, paymentId:pay.id, paidAt:pay.createdAt, agentId:agentId||null, fingerprintApproval:approval};});await saveData('entitlements',db.entitlements);await saveData('payments',oldPays.concat([pay]));await saveData('vouchers',oldVchs.concat([voucher]));}catch(e){db.entitlements=oldEnts;db.payments=oldPays;db.vouchers=oldVchs;alert('تعذر تثبيت الصرف: '+e.message);return;}
+  await audit('صرف',voucher.voucherNo+' | '+method+' | '+amount.toFixed(2)+' | اعتماد: '+approval.type+(approval.reason?' | '+approval.reason:''));alert('تم اعتماد الصرف وإنشاء السند: '+voucher.voucherNo);await renderPay();await renderVouchers();await renderDashboard();printVoucher(voucher.id);
+}
+function payEmployee(){return makePayment('employee',null);}
+function payViaAgent(){const agents=db.agents.filter(a=>a.active!==false);if(!agents.length)return alert('لا يوجد وكلاء. أضف الوكيل أولاً.');const x=prompt('أدخل رقم/معرف الوكيل:\n'+agents.map(a=>a.id+' — '+a.name).join('\n'),agents[0].id);if(x===null)return;const id=trim(x);if(!getById(agents,id))return alert('الوكيل غير موجود.');return makePayment('agent',id);}
+async function payFingerprintSearch(){const fp=await captureLiveFingerprint();if(!fp)return;const emp=db.employees.find(e=>credentialList(e).includes(fp));if(!emp)return alert('البصمة غير مسجلة لموظف.');document.getElementById('payEmpNo').value=emp.employeeNo;await renderPay();await audit('تعرف بالبصمة','موظف: '+emp.employeeNo);}
+
+async function renderAgents(){const h=[];for(const a of db.agents){const ids=db.authorizations.filter(x=>x.agentId===a.id&&x.active!==false).map(x=>employeeNameById(x.employeeId));h.push('<tr><td>'+esc(a.id)+'</td><td>'+esc(a.name)+'</td><td>'+esc(ids.join('، ')||'—')+'</td><td>'+esc(a.phone||'')+'</td><td>'+(credentialList(a).length?'مسجلة':'غير مسجلة')+'</td><td>'+(a.active===false?'موقوف':'فعال')+'</td><td><button class="btn" onclick="authorizeAgent(\''+a.id+'\')">تفويض موظف</button><button class="btn" onclick="editAgent(\''+a.id+'\')">تعديل</button><button class="btn" onclick="registerAgentFingerprint(\''+a.id+'\')">تسجيل بصمة</button></td></tr>');}document.getElementById('agentsRows').innerHTML=h.join('')||'<tr><td colspan="7" class="empty">لا يوجد وكلاء.</td></tr>';}
+async function addAgent(){if(currentRole!=='manager')return alert('إضافة الوكلاء للمدير فقط.');const name=prompt('اسم الوكيل:','');if(name===null||!trim(name))return;const phone=prompt('الجوال (اختياري):','')||'';db.agents.push({id:uid('AG'),name:trim(name),phone:trim(phone),fingerprintId:'',active:true,createdAt:nowISO()});await saveData('agents',db.agents);await audit('إضافة وكيل',trim(name));await renderAgents();}
+async function editAgent(id){if(currentRole!=='manager')return alert('تعديل الوكلاء للمدير فقط.');const ag=getById(db.agents,id);if(!ag)return;const n=prompt('اسم الوكيل:',ag.name);if(n!==null)ag.name=trim(n);const phone=prompt('الجوال:',ag.phone||'');if(phone!==null)ag.phone=trim(phone);await saveData('agents',db.agents);await audit('تعديل وكيل',ag.name);await renderAgents();alert('تم تعديل بيانات الوكيل. تسجيل البصمة من زر تسجيل البصمة.');}
+async function registerAgentFingerprint(id){if(currentRole!=='manager')return alert('تسجيل بصمة الوكيل للمدير فقط.');const ag=getById(db.agents,id);if(!ag)return;try{const fp=await registerLiveFingerprint(ag,'agent');if(!fp)return;await saveData('agents',db.agents);await audit('تسجيل بصمة وكيل',ag.name);await renderAgents();alert('تم تسجيل بصمة/تحقق الجهاز للوكيل '+ag.name+'.');}catch(err){alert('تعذر تسجيل البصمة: '+(err.message||err));}}
+async function authorizeAgent(agentId){if(currentRole!=='manager')return alert('تفويض الوكلاء للمدير فقط.');const no=prompt('رقم الموظف المراد تفويضه:','');if(no===null)return;const emp=employeeByNo(no);if(!emp)return alert('الموظف غير موجود.');const end=prompt('تاريخ نهاية التفويض YYYY-MM-DD:','2099-12-31')||'2099-12-31';db.authorizations.push({id:uid('AUTH'),agentId,employeeId:emp.id,startDate:new Date().getFullYear()+'-01-01',endDate:end,active:true,createdAt:nowISO(),createdBy:currentUser.id});await saveData('authorizations',db.authorizations);await audit('تفويض وكيل',agentId+' -> '+emp.employeeNo);await renderAgents();}
+async function renderVouchers(){const h=[];for(let i=db.vouchers.length-1;i>=0;i--){const x=db.vouchers[i],who=x.method==='agent'?((getById(db.agents,x.agentId)||{}).name||'—'):employeeNameById(x.employeeId);h.push('<tr><td>'+esc(x.voucherNo)+'</td><td>'+esc(x.createdAt)+'</td><td>'+paymentMethodLabel(x)+'</td><td>'+esc(who)+'</td><td>'+Number(x.total||0).toFixed(2)+'</td><td>'+Number(x.printedCount||0)+'</td><td><button class="btn" onclick="printVoucher(\''+x.id+'\')">إعادة طباعة</button></td></tr>');}document.getElementById('vouchersRows').innerHTML=h.join('')||'<tr><td colspan="7" class="empty">لا توجد سندات.</td></tr>';}
+function voucherPrintHtml(v){const ents=v.lines||[],ag=v.method==='agent'?getById(db.agents,v.agentId):null,emp=v.method==='employee'?getById(db.employees,v.employeeId):null,beneficiary=ag?ag.name:(emp?emp.name:'—'),methodText=v.method==='agent'?'عبر وكيل '+(ag?ag.name:'—'):v.method==='bank'?'عبر البنك':'الشخص نفسه';let rows='';ents.forEach((e,i)=>{const ee=getById(db.employees,e.employeeId);rows+='<tr><td>'+(i+1)+'</td><td>'+esc(ee?ee.employeeNo:'—')+'</td><td>'+esc(ee?ee.name:'—')+'</td><td>'+e.year+' / '+monthName(e.month)+'</td><td>'+(e.type==='salary'?'راتب':'إعاشة')+'</td><td>'+Number(e.amount||0).toFixed(2)+' ريال</td></tr>';});return '<!doctype html><html dir="rtl"><head><meta charset="utf-8"><title>سند صرف '+esc(v.voucherNo)+'</title><style>@page{size:A4;margin:12mm}body{font-family:Tahoma,Arial,sans-serif;color:#17242c;background:#fff;margin:0;padding:0}.sheet{border:1px solid #8b989f;padding:18px;min-height:245mm;box-sizing:border-box}.top{display:table;width:100%;border-bottom:3px solid #173b55;padding-bottom:12px}.brand{display:table-cell;width:60%;vertical-align:middle;text-align:right}.brand h1{margin:0;font-size:22px;color:#173b55}.brand p{margin:5px 0 0;font-size:10px;color:#66747d}.voucherNo{display:table-cell;width:40%;vertical-align:middle;text-align:left}.badge{display:inline-block;border:1px solid #173b55;padding:7px 12px;font-size:11px}.info{margin-top:15px;border:1px solid #b7c1c6}.row{display:table;width:100%;border-bottom:1px solid #d7dde0}.cell{display:table-cell;width:33.33%;padding:9px 10px;border-left:1px solid #d7dde0;font-size:11px;vertical-align:top}.cell:last-child{border-left:0}.label{font-size:9px;color:#6d7b83;margin-bottom:4px}.value{font-weight:bold;font-size:12px}.section{margin-top:16px;font-weight:bold;color:#173b55;font-size:12px;border-right:4px solid #173b55;padding-right:7px}table{width:100%;border-collapse:collapse;margin-top:8px}th{background:#edf2f5;color:#173b55;font-size:10px;padding:8px;border:1px solid #aeb9bf}td{font-size:10px;padding:8px;border:1px solid #c4ccd0;text-align:center}.total{margin-top:12px;border:2px solid #173b55;padding:12px;text-align:right;font-size:13px;font-weight:bold}.total span{float:left;font-size:16px}.signs{margin-top:30px;display:table;width:100%;direction:ltr}.sign{display:table-cell;width:50%;text-align:center;vertical-align:top;direction:rtl}.signTitle{font-weight:bold;color:#173b55;font-size:11px;margin-bottom:8px}.signbox{width:88%;height:95px;border:1px solid #9ba7ad;margin:auto;box-sizing:border-box}.signline{width:88%;border-top:1px solid #555;margin:8px auto 0;padding-top:6px;font-size:10px}.foot{margin-top:18px;border-top:1px solid #d1d7da;padding-top:8px;text-align:center;color:#75828a;font-size:8px}.override{text-align:center;margin-top:10px;font-size:9px;color:#7b4b00}</style></head><body onload="setTimeout(function(){window.print();},400)"><div class="sheet"><div class="top"><div class="brand"><h1>سند صرف مستحقات</h1><p>نظام الرواتب والإعاشات</p></div><div class="voucherNo"><span class="badge">رقم السند: <b>'+esc(v.voucherNo)+'</b><br>التاريخ: '+esc(v.createdAt)+'</span></div></div><div class="info"><div class="row"><div class="cell"><div class="label">المستفيد</div><div class="value">'+esc(beneficiary)+'</div></div><div class="cell"><div class="label">طريقة الصرف</div><div class="value">'+esc(methodText)+'</div></div><div class="cell"><div class="label">عدد المستحقات</div><div class="value">'+ents.length+' بند</div></div></div></div><div class="section">تفاصيل الاستحقاقات</div><table><tr><th>م</th><th>الرقم الوظيفي</th><th>اسم الموظف</th><th>الفترة</th><th>البند</th><th>المبلغ</th></tr>'+rows+'</table><div class="total">إجمالي المبلغ المستحق <span>'+Number(v.total||0).toFixed(2)+' ريال</span></div><div class="signs"><div class="sign"><div class="signTitle">المسؤول عن الصرف</div><div class="signbox"></div><div class="signline">الاسم والتوقيع</div></div><div class="sign"><div class="signTitle">المستفيد</div><div class="signbox"></div><div class="signline">'+esc(beneficiary)+'</div></div></div>'+(v.fingerprintApproval&&v.fingerprintApproval.type==='manager_override'?'<div class="override">اعتماد إداري استثنائي — محفوظ في سجل التدقيق.</div>':'')+'<div class="foot">هذا السند صادر من نظام الرواتب والإعاشات • يحتفظ به ضمن سجل العمليات • لا يعدل بعد اعتماد الصرف.</div></div></body></html>';}
+async function printVoucher(id){const v=getById(db.vouchers,id);if(!v)return;const w=window.open('','_blank','width=900,height=900');if(!w)return alert('المتصفح منع نافذة الطباعة. اسمح بالنوافذ المنبثقة للموقع.');w.document.open();w.document.write(voucherPrintHtml(v));w.document.close();v.printedCount=Number(v.printedCount||0)+1;await saveData('vouchers',db.vouchers);await audit('طباعة سند',v.voucherNo);await renderVouchers();}
+
+async function renderReports(){const y=document.getElementById('rYear').value||'',m=document.getElementById('rMonth').value||'',type=document.getElementById('rType').value||'';let total=0,count=0,h='';for(const e of db.entitlements){if(e.status==='paid'||(y&&String(e.year)!==String(y))||(m&&String(e.month)!==String(m))||(type&&e.type!==type))continue;const emp=getById(db.employees,e.employeeId);if(!emp)continue;const amt=Number(e.amount||0),ded=Number(e.deduction||0),gross=Number(e.gross||amt);h+='<tr><td>'+esc(emp.employeeNo)+'</td><td>'+esc(emp.name)+'</td><td>'+e.year+' / '+monthName(e.month)+'</td><td>'+(e.type==='salary'?'راتب':'إعاشة')+'</td><td>'+gross.toFixed(2)+'</td><td>'+ded.toFixed(2)+'</td><td><b>'+amt.toFixed(2)+'</b></td></tr>';total+=amt;count++;}document.getElementById('reportRows').innerHTML=h||'<tr><td colspan="7" class="empty">لا توجد استحقاقات غير مصروفة لهذا الاختيار.</td></tr>';document.getElementById('reportSummary').innerHTML='عدد المستحقات غير المصروفة: <b>'+count+'</b> — <span class="greenText">إجمالي المبلغ المطلوب صرفه: <b>'+total.toFixed(2)+'</b></span>';}
+function entitlementPrintHtml(rows,title,y,m,total){let body='';rows.forEach((r,i)=>body+='<tr><td>'+(i+1)+'</td><td>'+esc(r.no)+'</td><td>'+esc(r.name)+'</td><td>'+r.type+'</td><td>'+r.gross.toFixed(2)+'</td><td>'+r.ded.toFixed(2)+'</td><td><b>'+r.amount.toFixed(2)+'</b></td></tr>');return '<!doctype html><html dir="rtl"><head><meta charset="utf-8"><title>'+esc(title)+' - '+esc(y)+' / '+esc(monthName(m))+'</title><style>@page{size:A4;margin:12mm}body{font-family:Tahoma,Arial;padding:24px;color:#222}h1{text-align:center;font-size:20px;margin-bottom:6px}h2{text-align:center;font-size:15px;font-weight:normal;margin-top:0}table{width:100%;border-collapse:collapse;margin-top:18px}th,td{border:1px solid #888;padding:6px;font-size:11px;text-align:center}th{background:#eee}.sum{margin-top:18px;padding:12px;border:2px solid #555;font-weight:bold;font-size:14px}.sig{margin-top:45px}.box{width:42%;display:inline-block;border-top:1px solid #555;padding-top:8px;text-align:center;margin-left:6%}</style></head><body onload="setTimeout(function(){window.print();},400)"><h1>'+esc(title)+'</h1><h2>السنة: '+esc(y)+' &nbsp;&nbsp; الشهر: '+esc(monthName(m))+'</h2><p style="text-align:center">هذا الكشف يحتوي على <b>الاستحقاقات غير المصروفة فقط</b>، وهو المبلغ المطلوب توفيره للصرف.</p><table><tr><th>م</th><th>الرقم الوظيفي</th><th>اسم الموظف</th><th>البند</th><th>مبلغ الاستحقاق</th><th>الخصم</th><th>الصافي المستحق للصرف</th></tr>'+body+'</table><div class="sum">عدد الاستحقاقات: '+rows.length+'<br>إجمالي المبلغ المطلوب صرفه: '+total.toFixed(2)+' ريال</div><div class="sig"><div class="box">إعداد / مراجعة</div><div class="box">اعتماد المدير</div></div></body></html>';}
+async function printFullEntitlementReport(){if(currentRole!=='manager')return alert('طباعة كشف المستحقات للمدير فقط.');const y=trim(document.getElementById('rYear').value),m=trim(document.getElementById('rMonth').value),type=trim(document.getElementById('rType').value);if(!y||!m)return alert('حدد السنة والشهر أولًا.');const rows=[];let total=0;for(const e of db.entitlements){if(e.status==='paid'||String(e.year)!==String(y)||String(e.month)!==String(m)||(type&&e.type!==type))continue;const emp=getById(db.employees,e.employeeId);if(!emp)continue;const amt=Number(e.amount||0),ded=Number(e.deduction||0),gross=Number(e.gross||amt);rows.push({no:emp.employeeNo,name:emp.name,type:e.type==='salary'?'راتب':'إعاشة',gross,ded,amount:amt});total+=amt;}if(!rows.length)return alert('لا توجد استحقاقات غير مصروفة لهذا الشهر والسنة.');rows.sort((a,b)=>String(a.no).localeCompare(String(b.no),'ar'));const title=type==='salary'?'كشف المستحقات — الرواتب':type==='allowance'?'كشف المستحقات — الإعاشات':'كشف المستحقات — الرواتب والإعاشات';const w=window.open('','_blank','width=900,height=900');if(!w)return alert('المتصفح منع نافذة الطباعة.');w.document.open();w.document.write(entitlementPrintHtml(rows,title,y,m,total));w.document.close();await audit('طباعة كشف المستحقات',title+' | '+y+'/'+m+' | عدد: '+rows.length+' | إجمالي المطلوب: '+total.toFixed(2));}
+
+async function renderUsers(){
+  const h=[];
+  for(const u of db.users){
+    h.push('<tr><td>'+esc(u.username)+'</td><td>'+esc(u.fullName||'')+'</td><td>'+roleName(u.role)+'</td><td>'+ (u.active===false?'موقوف':'فعال') +'</td><td>'+esc(u.createdAt||'—')+'</td><td><button class="btn" onclick="editUserRecord(\''+u.id+'\')">تعديل</button><button class="btn" onclick="relinkUserRole(\''+u.id+'\')">إعادة ربط الصلاحية</button><button class="btn" onclick="sendPasswordReset(\''+esc(u.username)+'\')">إعادة تعيين كلمة المرور</button><button class="btn danger userDelete" onclick="deleteUserAccount(\''+u.id+'\')">حذف المستخدم</button></td></tr>');
+  }
+  document.getElementById('usersRows').innerHTML=h.join('')||'<tr><td colspan="6" class="empty">لا يوجد مستخدمون مسجلون في بيانات النظام.</td></tr>';
+}
+function openUserModal(){if(currentRole!=='manager')return alert('إدارة المستخدمين للمدير فقط.');document.getElementById('newUserEmail').value='';document.getElementById('newUserFullName').value='';document.getElementById('newUserPassword').value='';document.getElementById('newUserPassword2').value='';document.getElementById('newUserRole').value='cashier';document.getElementById('newUserMsg').textContent='';document.getElementById('userModal').style.display='block';setTimeout(()=>document.getElementById('newUserEmail').focus(),50);}
+function closeUserModal(){document.getElementById('userModal').style.display='none';}
+async function createUserAccount(){
+  if(currentRole!=='manager')return alert('إدارة المستخدمين للمدير فقط.');
+  const email=trim(document.getElementById('newUserEmail').value).toLowerCase(),fullName=trim(document.getElementById('newUserFullName').value),password=document.getElementById('newUserPassword').value,password2=document.getElementById('newUserPassword2').value,role=document.getElementById('newUserRole').value,msg=document.getElementById('newUserMsg');
+  msg.textContent='';
+  if(!email||!email.includes('@')){msg.textContent='أدخل بريدًا إلكترونيًا صحيحًا.';return;}
+  if(!fullName){msg.textContent='الاسم الكامل مطلوب.';return;}
+  if(password.length<8){msg.textContent='كلمة المرور يجب أن تكون 8 أحرف على الأقل.';return;}
+  if(password!==password2){msg.textContent='تأكيد كلمة المرور غير مطابق.';return;}
+  if(!roleSet.includes(role)){msg.textContent='الصلاحية غير صحيحة.';return;}
+  if(db.users.some(u=>String(u.username||'').toLowerCase()===email)){msg.textContent='يوجد مستخدم بهذا البريد داخل النظام.';return;}
+  const btn=document.querySelector('#userModal .btn.primary');btn.disabled=true;msg.textContent='جارٍ إنشاء الحساب وربط الصلاحية...';
+  try{
+    const auth=await request('POST',SUPABASE_URL+'/auth/v1/signup',{email,password,data:{full_name:fullName,requested_role:role}},'');
+    const authUser=auth&&auth.user;if(!authUser||!authUser.id)throw new Error('Supabase لم يُرجع معرف المستخدم.');
+    if(Array.isArray(authUser.identities)&&authUser.identities.length===0)throw new Error('هذا البريد الإلكتروني مستخدم مسبقًا أو لم يسمح Supabase بإنشاء حساب جديد له.');
+    const x={id:authUser.id,username:email,fullName,role,active:true,createdAt:nowISO()};
+    let roleLinked=false,roleLinkMessage='';
+    try{
+      await request('POST',SUPABASE_URL+'/rest/v1/rpc/admin_set_user_role',{target_user_id:authUser.id,new_role:role},supabaseAccessToken,{'Prefer':'return=minimal'});roleLinked=true;
+    }catch(rpcErr){
+      roleLinkMessage=rpcErr.message||String(rpcErr);
+      try{await request('POST',SUPABASE_URL+'/rest/v1/payroll_user_roles',{user_id:authUser.id,role},supabaseAccessToken,{'Prefer':'resolution=merge-duplicates,return=minimal'});roleLinked=true;}catch(_){ }
+    }
+    db.users.push(x);await saveData('users',db.users);
+    await audit('إضافة حساب مستخدم',email+' | '+roleName(role)+' | '+(roleLinked?'تم ربط الصلاحية':'تعذر الربط المباشر: '+roleLinkMessage));
+    closeUserModal();
+    document.getElementById('userStatus').textContent=roleLinked?'تم إنشاء الحساب وربط الصلاحية بنجاح.':('تم إنشاء الحساب، لكن لم يتم ربط الصلاحية تلقائيًا. شغّل SQL المرفق ثم اضغط «إعادة ربط الصلاحية».');
+    await renderUsers();
+  }catch(e){msg.textContent='تعذر إنشاء المستخدم: '+(e.message||e);}
+  finally{btn.disabled=false;}
+}
+async function editUserRecord(id){
+  if(currentRole!=='manager')return alert('إدارة المستخدمين للمدير فقط.');
+  const u=getById(db.users,id);if(!u)return;
+  const n=prompt('الاسم:',u.fullName||'');if(n!==null)u.fullName=trim(n);
+  const r=prompt('الدور: manager / accountant / cashier',u.role);if(r!==null&&roleSet.includes(trim(r)))u.role=trim(r);
+  await saveData('users',db.users);
+  try{await request('POST',SUPABASE_URL+'/rest/v1/rpc/admin_set_user_role',{target_user_id:u.id,new_role:u.role},supabaseAccessToken,{'Prefer':'return=minimal'});}catch(e){alert('تم تعديل بيانات المستخدم، لكن تعذر تحديث دوره في Supabase. شغّل SQL المرفق ثم استخدم «إعادة ربط الصلاحية».\\n\\n'+e.message);return;}
+  await audit('تعديل مستخدم',u.username);await renderUsers();
+}
+async function relinkUserRole(id){
+  if(currentRole!=='manager')return alert('إدارة المستخدمين للمدير فقط.');
+  const u=getById(db.users,id);if(!u)return alert('المستخدم غير موجود.');
+  try{await request('POST',SUPABASE_URL+'/rest/v1/rpc/admin_set_user_role',{target_user_id:u.id,new_role:u.role},supabaseAccessToken,{'Prefer':'return=minimal'});alert('تم ربط المستخدم بالصلاحية بنجاح.');await audit('إعادة ربط صلاحية مستخدم',u.username+' | '+roleName(u.role));await renderUsers();}
+  catch(e){alert('تعذر ربط الصلاحية في Supabase: '+(e.message||e)+'\\n\\nنفّذ ملف SQL المرفق مرة واحدة في SQL Editor ثم أعد المحاولة.');}
+}
+async function sendPasswordReset(email){if(currentRole!=='manager')return alert('إدارة المستخدمين للمدير فقط.');try{await request('POST',SUPABASE_URL+'/auth/v1/recover',{email:trim(email)},'');await audit('إرسال إعادة تعيين كلمة المرور',trim(email));alert('تم إرسال رابط إعادة تعيين كلمة المرور إلى البريد الإلكتروني.');}catch(e){alert('تعذر إرسال رابط إعادة التعيين: '+e.message);}}async function deleteUserAccount(id){
+  if(currentRole!=='manager')return alert('حذف المستخدمين للمدير فقط.');
+  const u=getById(db.users,id);if(!u)return alert('المستخدم غير موجود.');
+  if(currentUser&&String(u.id)===String(currentUser.id))return alert('لا يمكن للمدير حذف حسابه الحالي من داخل الجلسة.');
+  if(!confirm('سيتم حذف مستخدم «'+(u.fullName||u.username)+'» من حسابات النظام.\n\nهذا إجراء نهائي ولا يمكن التراجع عنه.\nهل تريد المتابعة؟'))return;
+  try{
+    await request('POST',SUPABASE_URL+'/rest/v1/rpc/admin_delete_user',{target_user_id:u.id},supabaseAccessToken,{'Prefer':'return=minimal'});
+    db.users=db.users.filter(x=>String(x.id)!==String(id));await saveData('users',db.users);await audit('حذف مستخدم',u.username);await renderUsers();alert('تم حذف المستخدم من Supabase ومن النظام.');
+  }catch(e){alert('تعذر حذف المستخدم.\n\n'+(e.message||e)+'\n\nيجب تفعيل دالة Supabase «admin_delete_user» المرفقة مع النظام حتى يتم الحذف الكامل من Auth.');}
+}
+
+async function renderCloseYear(){await ensureCurrentYear();const y=activeYear(),openCount=db.entitlements.filter(e=>Number(e.year)===y&&e.status!=='paid').length;document.getElementById('closeCheck').innerHTML='السنة الحالية: <b>'+y+'</b><br>المستحقات غير المصروفة: <b>'+openCount+' مبلغ</b><br>السنة المغلقة تمنع أي رفع أو صرف جديد لها.';const ys=db.years.slice().sort((a,b)=>Number(b.year)-Number(a.year));document.getElementById('yearsRows').innerHTML=ys.map(x=>'<tr><td>'+x.year+'</td><td>'+(x.closed?'مغلقة':'مفتوحة')+'</td><td>'+(x.closed?'—':'<button class="btn green" onclick="closeYear('+x.year+')">إغلاق</button>')+'</td></tr>').join('');}
+async function closeYear(year){if(currentRole!=='manager')return alert('إغلاق السنة للمدير فقط.');const dues=db.entitlements.filter(e=>Number(e.year)===Number(year)&&e.status!=='paid').length;if(!confirm('هل تريد إغلاق السنة '+year+'؟\nيوجد '+dues+' استحقاق غير مصروف. سيبقى للعرض والأرشيف، لكن سيمنع إدخال أو صرف جديد.'))return;let y=db.years.find(x=>Number(x.year)===Number(year));if(!y){y={year:Number(year),createdAt:nowISO()};db.years.push(y);}y.closed=true;y.closedAt=nowISO();y.closedBy=currentUser.id;await saveData('years',db.years);await audit('إغلاق سنة',String(year));await renderCloseYear();alert('تم إغلاق السنة '+year);}
+async function renderAudit(){if(currentRole!=='manager')return;const q=trim(document.getElementById('auditSearch').value),h=[];for(let i=db.audit.length-1;i>=0;i--){const x=db.audit[i],hay=String(x.username||'')+' '+String(x.action||'')+' '+String(x.details||'');if(q&&!containsText(hay,q))continue;h.push('<tr><td>'+esc(x.at||'')+'</td><td>'+esc(x.username||'SYSTEM')+'</td><td>'+esc(x.action||'')+'</td><td>'+esc(x.details||'')+'</td></tr>');}document.getElementById('auditRows').innerHTML=h.join('')||'<tr><td colspan="4" class="empty">لا توجد عمليات في سجل التدقيق.</td></tr>';}
+
+async function renderDatabasePage(){
+  if(currentRole!=='manager')return;
+  document.getElementById('dbAdminUser').textContent=currentUser?((currentUser.fullName||currentUser.username)+' — '+roleName(currentRole)):'—';
+  document.getElementById('dbAdminSession').textContent=supabaseAccessToken?'نشطة ومحمية بتوكن الجلسة':'غير متصلة';document.getElementById('satStatus').textContent='حالة البصمة: '+fingerprintOriginMessage();
+  document.getElementById('dbCountEmployees').textContent=db.employees.length;
+  document.getElementById('dbCountEntitlements').textContent=db.entitlements.length;
+  document.getElementById('dbCountPayments').textContent=db.payments.length;
+  document.getElementById('dbCountVouchers').textContent=db.vouchers.length;
+  document.getElementById('dbCountAgents').textContent=db.agents.length;
+  document.getElementById('dbCountAudit').textContent=db.audit.length;
+  await renderUploads();
+}
+async function refreshDatabasePage(){if(currentRole!=='manager')return alert('إدارة قاعدة البيانات للمدير فقط.');try{await loadAllData();await renderDatabasePage();await refreshAll();document.getElementById('satStatus').textContent='تم تحديث بيانات Supabase.';}catch(e){alert('تعذر تحديث قاعدة البيانات: '+e.message);}}
+
+async function supabaseBackup(){if(currentRole!=='manager')return alert('النسخ الاحتياطي للمدير فقط.');const tables=['payroll_app_data','payroll_employees','payroll_agents','payroll_agent_delegations','payroll_upload_batches','payroll_entitlements','payroll_payments','payroll_vouchers','payroll_audit_log','payroll_closed_years','payroll_user_roles'];const out={backup_at:new Date().toISOString(),source:'Supabase',tables:{}};try{for(const t of tables)out.tables[t]=await request('GET',SUPABASE_URL+'/rest/v1/'+t+'?select=*',null,supabaseAccessToken);const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Payroll_Supabase_Backup_'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);document.getElementById('satStatus').textContent='تم إنشاء النسخة الاحتياطية.';await audit('نسخة احتياطية','Supabase');}catch(e){alert('فشل النسخ الاحتياطي: '+e.message);}}async function restoreSupabaseBackup(input){
+  if(currentRole!=='manager'){if(input)input.value='';return alert('استيراد النسخة الاحتياطية للمدير فقط.');}
+  const file=input&&input.files&&input.files[0];if(!file)return;
+  try{
+    const raw=await file.text();const backup=JSON.parse(raw);
+    if(!backup||backup.source!=='Supabase'||!backup.tables||!backup.tables.payroll_app_data)throw new Error('ملف النسخة الاحتياطية غير معروف أو غير مكتمل.');
+    const appRows=Array.isArray(backup.tables.payroll_app_data)?backup.tables.payroll_app_data:[];
+    const allowed=['employees','entitlements','payments','agents','authorizations','vouchers','audit','years','uploads'];
+    const restored={};for(const r of appRows){if(allowed.includes(r.name)&&Array.isArray(r.data))restored[r.name]=r.data;}
+    if(!Object.keys(restored).length)throw new Error('لم توجد بيانات تشغيلية قابلة للاستيراد في الملف.');
+    if(!confirm('سيتم استبدال البيانات التشغيلية الحالية بالنسخة المحددة.\n\nلا يتم استيراد حسابات Supabase Auth أو جدول صلاحيات المستخدمين.\n\nهل تريد المتابعة؟')){input.value='';return;}
+    const currentBackup={};allowed.forEach(k=>currentBackup[k]=db[k]);
+    try{for(const k of allowed)if(Object.prototype.hasOwnProperty.call(restored,k))await saveData(k,restored[k]);}
+    catch(e){for(const k of Object.keys(currentBackup)){if(currentBackup[k]!==undefined)try{await saveData(k,currentBackup[k]);}catch(_){}}throw e;}
+    await audit('استيراد نسخة احتياطية',file.name);await loadAllData();await refreshAll();document.getElementById('satStatus').textContent='تم استيراد النسخة الاحتياطية بنجاح.';alert('تم استيراد النسخة الاحتياطية.');
+  }catch(e){document.getElementById('satStatus').textContent='فشل الاستيراد.';alert('فشل استيراد النسخة الاحتياطية: '+(e.message||e));}
+  finally{if(input)input.value='';}
+}
+
+function uploadTypeName(type){return type==='salary'?'راتب':type==='food'?'إعاشة':type==='bank'?'بنك':'كشف';}
+function collectedUploads(){
+  const map=new Map();
+  const cancelledKeys=new Set();
+  (db.uploads||[]).forEach(x=>{
+    const base='CANCELLED|'+String(x.file_name||'')+'|'+String(x.year||'')+'|'+String(x.month||'')+'|'+String(x.type||'');
+    if(x.status==='cancelled')cancelledKeys.add(base);
+    if(x.status==='approved')map.set(String(x.id),{...x,_legacy:false});
+  });
+  // Backfill older records that were created before upload batches were stored.
+  (db.entitlements||[]).forEach(e=>{
+    if(!e.sourceFile)return;
+    const key=String(e.sourceBatchId||('LEGACY|'+e.sourceFile+'|'+e.year+'|'+e.month+'|'+e.type));
+    const ckey='CANCELLED|'+String(e.sourceFile||'')+'|'+String(e.year||'')+'|'+String(e.month||'')+'|'+(e.type==='allowance'?'food':'salary');
+    if(cancelledKeys.has(ckey)||map.has(key))return;
+    map.set(key,{id:key,type:e.type==='allowance'?'food':'salary',file_name:e.sourceFile,year:e.year,month:e.month,status:'approved',created_at:e.createdAt||'',approved_at:e.createdAt||'',_legacy:!e.sourceBatchId});
+  });
+  (db.payments||[]).forEach(p=>{
+    if(p.method!=='bank'||!p.sourceFile)return;
+    const line=p.lines&&p.lines[0];if(!line)return;
+    const key=String(p.sourceBatchId||('LEGACY|'+p.sourceFile+'|'+line.year+'|'+line.month+'|bank'));
+    const ckey='CANCELLED|'+String(p.sourceFile||'')+'|'+String(line.year||'')+'|'+String(line.month||'')+'|bank';
+    if(cancelledKeys.has(ckey)||map.has(key))return;
+    map.set(key,{id:key,type:'bank',file_name:p.sourceFile,year:line.year,month:line.month,status:'approved',created_at:p.createdAt||'',approved_at:p.createdAt||'',_legacy:!p.sourceBatchId});
+  });
+  return Array.from(map.values()).sort((a,b)=>String(b.approved_at||b.created_at||'').localeCompare(String(a.approved_at||a.created_at||'')));
+}
+async function renderUploads(){
+  if(currentRole!=='manager')return;
+  const rows=collectedUploads(),h=[];
+  for(const x of rows){
+    const affected=db.entitlements.filter(e=>{
+      if(x.id&&!String(x.id).startsWith('LEGACY|'))return String(e.sourceBatchId||'')===String(x.id);
+      return String(e.sourceFile||'')===String(x.file_name||'')&&String(e.year)===String(x.year)&&String(e.month)===String(x.month)&&(x.type==='bank'?e.method==='bank':e.type==='food'?e.type==='allowance':e.type==='salary');
+    });
+    const count=affected.length;
+    const canCancel=affected.some(e=>x.type==='bank'?e.method==='bank':e.status!=='paid');
+    h.push('<tr><td>'+uploadTypeName(x.type)+'</td><td>'+esc(x.file_name||'—')+'</td><td>'+esc(x.year||'—')+'</td><td>'+esc(monthName(x.month))+'</td><td>'+count+'</td><td>'+esc(x.approved_at||x.created_at||'—')+'</td><td>معتمد</td><td>'+ (canCancel?'<button class="btn danger" data-upload-id="'+esc(String(x.id))+'" onclick="cancelUploadedBatch(this.dataset.uploadId)">إلغاء الكشف</button>':'<span class="small">لا يمكن الإلغاء</span>') +'</td></tr>');
+  }
+  document.getElementById('uploadsRows').innerHTML=h.join('')||'<tr><td colspan="8" class="empty">لا توجد كشوف مرفوعة مسجلة حاليًا.</td></tr>';
+}
+function findUploadById(id){return collectedUploads().find(x=>String(x.id)===String(id))||null;}
+async function cancelUploadedBatch(id){
+  if(currentRole!=='manager')return alert('إلغاء الكشوف للمدير فقط.');
+  const batch=findUploadById(id);if(!batch)return alert('الكشف المرفوع غير موجود.');
+  const affected=db.entitlements.filter(e=>{
+    if(batch.id&&!String(batch.id).startsWith('LEGACY|'))return String(e.sourceBatchId||'')===String(batch.id);
+    return String(e.sourceFile||'')===String(batch.file_name||'')&&String(e.year)===String(batch.year)&&String(e.month)===String(batch.month)&&(batch.type==='bank'?e.method==='bank':batch.type==='food'?e.type==='allowance':e.type==='salary');
+  });
+  const reason=prompt('سبب إلغاء الكشف «'+(batch.file_name||'')+'» ('+uploadTypeName(batch.type)+'):\\nاكتب السبب:');if(reason===null||!trim(reason))return alert('سبب الإلغاء مطلوب.');
+  if(batch.type!=='bank'&&affected.some(e=>e.status==='paid'))return alert('لا يمكن إلغاء هذا الكشف لأن هناك استحقاقًا تم صرفه بالفعل.');
+  if(!confirm('سيتم إلغاء الكشف: '+(batch.file_name||'')+'\\nالنوع: '+uploadTypeName(batch.type)+'\\nالسنة: '+batch.year+'\\nالشهر: '+monthName(batch.month)+'\\nعدد السجلات: '+affected.length+'\\n\\nهل تريد المتابعة؟'))return;
+  try{
+    if(batch.type==='bank'){
+      const affectedIds=new Set(affected.map(e=>String(e.id)));
+      db.entitlements=db.entitlements.map(e=>affectedIds.has(String(e.id))?{...e,status:'unpaid',method:'cash',bankReversedAt:nowISO(),bankReversedBy:currentUser?currentUser.id:null,bankCancellationReason:trim(reason)}:e);
+      db.payments=db.payments.map(p=>{
+        const linked=p.lines&&p.lines.some(l=>affectedIds.has(String(l.entitlementId)));
+        return linked?{...p,reversed:true,reversedAt:nowISO(),reversedBy:currentUser?currentUser.id:null,reversalReason:trim(reason)}:p;
+      });
+      await saveData('entitlements',db.entitlements);await saveData('payments',db.payments);
+    }else{
+      const affectedIds=new Set(affected.map(e=>String(e.id)));
+      db.entitlements=db.entitlements.map(e=>affectedIds.has(String(e.id))?{...e,status:'cancelled',cancelledAt:nowISO(),cancelledBy:currentUser?currentUser.id:null,cancelReason:trim(reason)}:e);
+      await saveData('entitlements',db.entitlements);
+    }
+    if(!String(batch.id).startsWith('LEGACY|')){
+      const ups=(db.uploads||[]).map(x=>String(x.id)===String(batch.id)?{...x,status:'cancelled',cancelled_at:nowISO(),cancelled_by:currentUser?currentUser.id:null,cancel_reason:trim(reason)}:x);
+      await saveData('uploads',ups);
+    }else{
+      // Create a persistent cancellation record so the legacy virtual batch will not reappear.
+      const keyId='CANCELLED|'+batch.file_name+'|'+batch.year+'|'+batch.month+'|'+batch.type;
+      const ups=(db.uploads||[]).filter(x=>String(x.id)!==keyId).concat([{id:keyId,type:batch.type,file_name:batch.file_name,year:batch.year,month:batch.month,status:'cancelled',cancelled_at:nowISO(),cancelled_by:currentUser?currentUser.id:null,cancel_reason:trim(reason),created_at:batch.created_at||nowISO()}]);
+      await saveData('uploads',ups);
+    }
+    await audit('إلغاء كشف مرفوع',uploadTypeName(batch.type)+' | '+(batch.file_name||'')+' | '+batch.year+'/'+monthName(batch.month)+' | '+trim(reason));
+    await loadAllData();await refreshAll();alert('تم إلغاء الكشف بنجاح.');
+  }catch(e){alert('فشل إلغاء الكشف: '+(e.message||e));}
+}
+
+async function showCancelUploads(){await renderUploads();const panel=document.getElementById('uploadsRows');if(panel)panel.scrollIntoView({behavior:'smooth',block:'center'});}
+
+function enableMouseWheelNavigation(){
+  const content=document.getElementById('content'),side=document.getElementById('side');
+  const bind=(el)=>{if(!el)return;el.addEventListener('wheel',function(e){
+    if(e.ctrlKey)return;
+    if(this.scrollHeight>this.clientHeight){this.scrollTop+=e.deltaY;e.preventDefault();}
+  },{passive:false});};
+  bind(content);bind(side);
+  document.addEventListener('wheel',function(e){
+    if(e.ctrlKey)return;
+    const target=e.target;
+    if(target.closest && (target.closest('#side')||target.closest('#content')||target.closest('.modal')||target.closest('input,textarea,select')))return;
+    if(content&&content.scrollHeight>content.clientHeight){content.scrollTop+=e.deltaY;e.preventDefault();}
+  },{passive:false});
+}
+enableMouseWheelNavigation();
+showLogin();
+</script>
+</body>
+</html>
